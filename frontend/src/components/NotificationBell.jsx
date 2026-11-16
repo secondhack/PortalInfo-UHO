@@ -1,0 +1,10 @@
+import React,{useEffect,useState,useCallback} from 'react';
+import {Link} from 'react-router-dom';
+import {api} from '../api/client';
+import {formatDate} from './ContentUI';
+export default function NotificationBell(){
+ const [count,setCount]=useState(0),[open,setOpen]=useState(false),[rows,setRows]=useState(null),[error,setError]=useState('');
+ const load=useCallback(async()=>{try{const data=await api('/api/admin/notifications/unread/');setCount(data.count);setError('');if(open)setRows((await api('/api/admin/notifications/?page=1')).results);}catch(e){setError(e.message);}},[open]);
+ useEffect(()=>{load();const timer=setInterval(()=>{if(document.visibilityState!=='hidden')load();},30000);const key=e=>{if(e.key==='Escape')setOpen(false);};document.addEventListener('keydown',key);return()=>{clearInterval(timer);document.removeEventListener('keydown',key);};},[load]);
+ return <div className="notification-shell"><button aria-label={`Notificaciones: ${count} no leídas`} aria-expanded={open} onClick={()=>setOpen(!open)}>🔔 <span aria-live="polite">{count}</span></button>{open&&<section className="notification-popover" aria-label="Panel de notificaciones"><h2>Notificaciones</h2>{error&&<p role="alert">{error}</p>}<button onClick={async()=>{try{await api('/api/admin/notifications/mark_all_read/',{method:'POST'});await load();}catch(e){setError(e.message);}}}>Marcar todas como leídas</button>{rows===null?<p>Cargando…</p>:!rows.length?<p>No hay notificaciones.</p>:rows.map(row=><article key={row.id} className={row.read?'notification-read':'notification-unread'}><strong>{row.title||row.kind}</strong>{row.demo&&<span className="badge">DEMO</span>}<p>{row.message}</p><small>{formatDate(row.created_at)} · {row.kind}</small>{row.resource_id&&<Link onClick={()=>setOpen(false)} to={`/contents?content=${row.resource_id}`}>Ver contenido</Link>}{!row.read&&<button onClick={async()=>{try{await api(`/api/admin/notifications/${row.id}/mark_read/`,{method:'POST'});await load();}catch(e){setError(e.message);}}}>Marcar como leída</button>}</article>)}<Link to="/notifications" onClick={()=>setOpen(false)}>Ver todas las notificaciones →</Link></section>}</div>;
+}

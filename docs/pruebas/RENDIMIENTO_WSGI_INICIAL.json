@@ -1,0 +1,149 @@
+{
+  "timestamp_utc": "2026-11-14T16:43:09.788509+00:00",
+  "base": "http://127.0.0.1:8010",
+  "tool": "Python http.client + bounded ThreadPoolExecutor/Barrier",
+  "environment": {
+    "os": "Windows-10-10.0.19041-SP0",
+    "processor": "Intel64 Family 6 Model 60 Stepping 3, GenuineIntel",
+    "logical_cpus": 4,
+    "python": "3.11.9",
+    "server": "Waitress 3.0.2, 8 threads, backlog 256, connection_limit 256, 30s channel timeout; Django/PostgreSQL local"
+  },
+  "html_bytes": 24370,
+  "normal_5_each": {
+    "/portal/": {
+      "requests": 5,
+      "statuses": {
+        "200": 5
+      },
+      "median_all_ms": 1.783,
+      "p95_all_ms": 4.727,
+      "max_all_ms": 4.727,
+      "max_success_ms": 4.727,
+      "max_bytes": 24370
+    },
+    "/api/config": {
+      "requests": 5,
+      "statuses": {
+        "200": 5
+      },
+      "median_all_ms": 36.533,
+      "p95_all_ms": 121.467,
+      "max_all_ms": 121.467,
+      "max_success_ms": 121.467,
+      "max_bytes": 1790
+    },
+    "/api/categorias?include_contents=false": {
+      "requests": 5,
+      "statuses": {
+        "200": 5
+      },
+      "median_all_ms": 43.685,
+      "p95_all_ms": 87.935,
+      "max_all_ms": 87.935,
+      "max_success_ms": 87.935,
+      "max_bytes": 802
+    },
+    "/api/noticias": {
+      "requests": 5,
+      "statuses": {
+        "200": 5
+      },
+      "median_all_ms": 43.954,
+      "p95_all_ms": 46.473,
+      "max_all_ms": 46.473,
+      "max_success_ms": 46.473,
+      "max_bytes": 388
+    },
+    "/api/eventos": {
+      "requests": 5,
+      "statuses": {
+        "200": 5
+      },
+      "median_all_ms": 44.499,
+      "p95_all_ms": 66.781,
+      "max_all_ms": 66.781,
+      "max_success_ms": 66.781,
+      "max_bytes": 440
+    },
+    "/api/avisos": {
+      "requests": 5,
+      "statuses": {
+        "200": 5
+      },
+      "median_all_ms": 94.699,
+      "p95_all_ms": 169.165,
+      "max_all_ms": 169.165,
+      "max_success_ms": 169.165,
+      "max_bytes": 293
+    },
+    "/api/servicios": {
+      "requests": 5,
+      "statuses": {
+        "200": 5
+      },
+      "median_all_ms": 47.839,
+      "p95_all_ms": 145.23,
+      "max_all_ms": 145.23,
+      "max_success_ms": 145.23,
+      "max_bytes": 420
+    },
+    "/api/encuestas": {
+      "requests": 5,
+      "statuses": {
+        "200": 5
+      },
+      "median_all_ms": 48.112,
+      "p95_all_ms": 143.958,
+      "max_all_ms": 143.958,
+      "max_success_ms": 143.958,
+      "max_bytes": 728
+    }
+  },
+  "paced_api": {
+    "requests": 25,
+    "statuses": {
+      "200": 25
+    },
+    "median_all_ms": 47.549,
+    "p95_all_ms": 113.429,
+    "max_all_ms": 144.584,
+    "max_success_ms": 144.584,
+    "max_bytes": 388,
+    "rate": 5,
+    "scheduled_seconds": 5,
+    "peak_active_client_requests": 1
+  },
+  "burst_html": {
+    "requests": 200,
+    "statuses": {
+      "200": 200
+    },
+    "median_all_ms": 124.058,
+    "p95_all_ms": 215.42,
+    "max_all_ms": 235.039,
+    "max_success_ms": 235.039,
+    "max_bytes": 24370,
+    "peak_active_client_requests": 185,
+    "duration_seconds": 0.308
+  },
+  "burst_api": {
+    "requests": 200,
+    "statuses": {
+      "429": 140,
+      "200": 60
+    },
+    "median_all_ms": 1390.688,
+    "p95_all_ms": 1539.573,
+    "max_all_ms": 1588.932,
+    "max_success_ms": 1485.544,
+    "max_bytes": 388,
+    "peak_active_client_requests": 200,
+    "duration_seconds": 1.672
+  },
+  "limits": [
+    "Only one burst per endpoint; API limiter remains 120/min/IP. 429 responses are expected when its budget is exceeded.",
+    "Paced requests do not represent 200 simultaneous active clients. Burst peak is measured separately.",
+    "Loopback/one process/one source IP, no TLS or WiFi/radio and no browser rendering; does not certify institutional RNF-01/02/03."
+  ]
+}

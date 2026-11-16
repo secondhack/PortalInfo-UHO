@@ -1,0 +1,19 @@
+import React,{useEffect,useRef,useId} from 'react';
+
+export const states={draft:'Borrador',pending:'Pendiente',approved:'Aprobado',rejected:'Rechazado',hidden:'Oculto'};
+export const validityOptions=[['default','Predeterminada por configuración'],['today','Hoy'],['three_days','Tres días'],['week','Esta semana'],['month','Este mes'],['always','Siempre'],['custom','Rango personalizado']];
+export const formatDate=value=>value?new Intl.DateTimeFormat('es-CU',{dateStyle:'medium',timeStyle:'short',timeZone:'America/Havana'}).format(new Date(value)):'Sin fecha final';
+export function Status({value}){return <span className={`editorial-status ${value}`}>{states[value]||value}</span>;}
+export function CharacterField({label,value='',limit,onChange,multiline=false,...props}){const id=useId();const Input=multiline?'textarea':'input';return <label>{label}<Input {...props} aria-label={label} aria-describedby={id} value={value} maxLength={limit} onChange={e=>onChange(e.target.value)}/><small id={id} className={value.length>limit?'error-text':''}>{Array.from(value).length} / {limit} caracteres</small></label>;}
+export function Pagination({data,page,onChange}){return <div className="pagination"><button disabled={!data?.previous} onClick={()=>onChange(page-1)}>Anterior</button><span>Página {page} · {data?.count||0} registros</span><button disabled={!data?.next} onClick={()=>onChange(page+1)}>Siguiente</button></div>;}
+export function Dialog({title,onClose,children,wide=false}){
+ const node=useRef(),id=useId(),close=useRef(onClose);close.current=onClose;
+ useEffect(()=>{const old=document.activeElement;const focusables=()=>Array.from(node.current.querySelectorAll('button,input,select,textarea,a[href]')).filter(x=>!x.disabled);focusables()[0]?.focus();const key=e=>{if(e.key==='Escape'){e.preventDefault();close.current();}if(e.key==='Tab'){const items=focusables(),first=items[0],last=items.at(-1);if(e.shiftKey&&document.activeElement===first){e.preventDefault();last?.focus();}else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first?.focus();}}};document.addEventListener('keydown',key);return()=>{document.removeEventListener('keydown',key);old?.focus();};},[]);
+ return <div className="modal-backdrop"><section ref={node} role="dialog" aria-modal="true" aria-labelledby={id} className={`modal ${wide?'wide':''}`}><div className="page-title"><h2 id={id}>{title}</h2><button type="button" aria-label="Cerrar diálogo" onClick={onClose}>×</button></div>{children}</section></div>;
+}
+export function PublicationPreview({content,category,areas=[]}){
+ const details=content.details||{},area=areas.find(a=>a.id===Number(details.area));
+ const url=details.access_url||details.external_url||details.invitation_url;
+ const safe=url&&/^https?:\/\//i.test(url);
+ return <article className="publication-preview"><span className="badge">{category?.name||content.category_name} · VISTA PREVIA</span><h2>{content.title||'Sin título'}</h2><p className="plain-text">{content.description}</p>{(area||details.area_name)&&<p>Área: {area?.name||details.area_name}</p>}{details.event_at&&<p>Fecha del evento: {formatDate(details.event_at)}</p>}{details.contact&&<p>Contacto: {details.contact}</p>}{safe&&<a href={url} target="_blank" rel="noopener noreferrer">Abrir enlace →</a>}{Object.entries(content.extra_fields||{}).map(([key,value])=><p key={key}><strong>{key}: </strong>{value}</p>)}{(details.questions||[]).map((q,i)=><fieldset key={q.id||i}><legend>{i+1}. {q.text} {q.required?'*':''}</legend>{q.kind==='open'?<textarea aria-label={`Respuesta de vista previa ${i+1}`} placeholder="Respuesta abierta (vista previa)"/>:q.options.map((o,j)=><label className="inline-label" key={o.id||j}><input type={q.kind==='multiple'?'checkbox':'radio'} name={`preview-${i}`}/>{o.text}</label>)}</fieldset>)}<small>Vista previa del contenido; las respuestas aquí no se envían.</small></article>;
+}

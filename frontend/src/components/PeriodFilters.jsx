@@ -1,0 +1,7 @@
+import React from 'react';
+export const initialPeriod={period:'7d',data_scope:'real',date_from:'',date_to:''};
+export function periodQuery(value,extra={}){const params=new URLSearchParams({...value,...extra});if(value.period!=='custom'){params.delete('date_from');params.delete('date_to');}return params.toString();}
+export default function PeriodFilters({value,onChange,hideScope=false}){
+ const set=(key,v)=>onChange({...value,[key]:v});
+ return <div className="period-filters"><label>Período<select value={value.period} onChange={e=>set('period',e.target.value)}><option value="today">Hoy</option><option value="7d">Últimos siete días</option><option value="30d">Últimos treinta días</option><option value="month">Este mes</option><option value="custom">Rango personalizado</option></select></label>{value.period==='custom'&&<><label>Desde<input type="date" required value={value.date_from} onChange={e=>set('date_from',e.target.value)}/></label><label>Hasta<input type="date" required min={value.date_from} value={value.date_to} onChange={e=>set('date_to',e.target.value)}/></label></>}{!hideScope&&<label>Fuente de actividad<select value={value.data_scope} onChange={e=>set('data_scope',e.target.value)}><option value="real">Interacciones registradas</option><option value="demo">Semilla DEMO</option><option value="all">Todas (incluye DEMO)</option></select></label>}<small>America/Havana · fechas finales inclusivas en el formulario</small></div>;
+}

@@ -1,0 +1,8 @@
+import React,{useState} from 'react';
+import {Navigate} from 'react-router-dom';
+import {useAuth} from '../contexts/Auth';
+import {Feedback} from '../components/Feedback';
+export default function Login(){const {user,login}=useAuth();const [error,setError]=useState(''),[busy,setBusy]=useState(false);
+ if(user)return <Navigate to="/" replace/>;
+ return <div className="login-page"><section className="login-intro"><div className="brand">PortalInfo<span> UHO</span></div><p className="eyebrow">UNIVERSIDAD DE HOLGUÍN</p><h1>La información institucional,<br/>en un solo lugar.</h1><p>Administra los contenidos del portal cautivo y organiza la comunicación de la universidad.</p><small>Entorno local de demostración · Sin conexión a AGA_AUTH</small></section><form className="login-card" onSubmit={async e=>{e.preventDefault();setBusy(true);setError('');const d=new FormData(e.currentTarget);try{await login(d.get('email'),d.get('password'));}catch(e){setError(e.message);}finally{setBusy(false);}}}><span className="badge">ACCESO ADMINISTRATIVO</span><h2>Iniciar sesión</h2><p>Utiliza una identidad ficticia previamente autorizada.</p><Feedback error={error}/><label>Correo institucional<input name="email" type="email" autoComplete="username" placeholder="demo@uho.edu.cu" required/></label><label>Contraseña de demostración<input name="password" type="password" autoComplete="current-password" required/></label><button className="primary" disabled={busy}>{busy?'Comprobando…':'Entrar al panel →'}</button><small>No introduzcas credenciales institucionales reales. Las cuentas se inicializan con el comando seed_demo.</small></form></div>;
+}

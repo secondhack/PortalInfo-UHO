@@ -1,0 +1,17 @@
+.venv/
+.local/*
+!.local/demo-credentials.txt
+!.local/portal-demo-credentials.txt
+!.local/portal-demo-users.json
+!.local/backups/
+!.local/capturas/
+.local/backups/*
+!.local/backups/*.dump
+__pycache__/
+*.pyc
+node_modules/
+dist/
+!captive-portal/dist/
+!captive-portal/dist/index.html
+.coverage
+backend/staticfiles/

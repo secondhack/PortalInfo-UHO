@@ -1,0 +1,133 @@
+{
+  "timestamp_utc": "2026-11-14T16:15:13.728317+00:00",
+  "base": "http://127.0.0.1:8010",
+  "tool": "Python stdlib http.client + ThreadPoolExecutor + Barrier; one TCP connection per request",
+  "environment": {
+    "platform": "Windows-10-10.0.19041-SP0",
+    "cpu": "Intel64 Family 6 Model 60 Stepping 3, GenuineIntel",
+    "logical_cpus": 4,
+    "python": "3.11.9",
+    "server": "Django development runserver, PostgreSQL 16 local"
+  },
+  "connections": 200,
+  "html_bytes": 24370,
+  "normal": {
+    "/portal/": {
+      "requests": 5,
+      "statuses": {
+        "200": 5
+      },
+      "min_ms": 2.222,
+      "median_ms": 2.631,
+      "p95_ms": 80.519,
+      "max_ms": 80.519,
+      "max_response_bytes": 24370
+    },
+    "/api/config": {
+      "requests": 5,
+      "statuses": {
+        "200": 5
+      },
+      "min_ms": 34.986,
+      "median_ms": 35.315,
+      "p95_ms": 43.564,
+      "max_ms": 43.564,
+      "max_response_bytes": 1790
+    },
+    "/api/categorias?include_contents=false": {
+      "requests": 5,
+      "statuses": {
+        "200": 5
+      },
+      "min_ms": 32.848,
+      "median_ms": 33.991,
+      "p95_ms": 34.093,
+      "max_ms": 34.093,
+      "max_response_bytes": 802
+    },
+    "/api/noticias": {
+      "requests": 5,
+      "statuses": {
+        "200": 5
+      },
+      "min_ms": 40.074,
+      "median_ms": 40.739,
+      "p95_ms": 63.758,
+      "max_ms": 63.758,
+      "max_response_bytes": 388
+    },
+    "/api/eventos": {
+      "requests": 5,
+      "statuses": {
+        "200": 5
+      },
+      "min_ms": 40.256,
+      "median_ms": 40.989,
+      "p95_ms": 42.033,
+      "max_ms": 42.033,
+      "max_response_bytes": 440
+    },
+    "/api/avisos": {
+      "requests": 5,
+      "statuses": {
+        "200": 5
+      },
+      "min_ms": 40.769,
+      "median_ms": 40.946,
+      "p95_ms": 41.884,
+      "max_ms": 41.884,
+      "max_response_bytes": 293
+    },
+    "/api/servicios": {
+      "requests": 5,
+      "statuses": {
+        "200": 5
+      },
+      "min_ms": 40.219,
+      "median_ms": 40.236,
+      "p95_ms": 41.406,
+      "max_ms": 41.406,
+      "max_response_bytes": 420
+    },
+    "/api/encuestas": {
+      "requests": 5,
+      "statuses": {
+        "200": 5
+      },
+      "min_ms": 40.633,
+      "median_ms": 42.322,
+      "p95_ms": 55.95,
+      "max_ms": 55.95,
+      "max_response_bytes": 728
+    }
+  },
+  "concurrent_html": {
+    "requests": 200,
+    "statuses": {
+      "200": 68,
+      "error:ConnectionResetError": 132
+    },
+    "min_ms": 18.367,
+    "median_ms": 534.462,
+    "p95_ms": 598.615,
+    "max_ms": 609.487,
+    "max_response_bytes": 24370
+  },
+  "concurrent_api": {
+    "requests": 200,
+    "statuses": {
+      "200": 66,
+      "error:ConnectionResetError": 134
+    },
+    "min_ms": 46.244,
+    "median_ms": 532.452,
+    "p95_ms": 1350.644,
+    "max_ms": 1518.682,
+    "max_response_bytes": 388
+  },
+  "limits": [
+    "Single loopback IP is subject to the normal API rate limit; 429 is recorded, never hidden.",
+    "Development server, no TLS, no mobile radio/network, no browser rendering; does not certify RNF-01/02/03.",
+    "200 client connections start together; server acceptance/queuing and OS limits are included."
+  ]
+}

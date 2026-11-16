@@ -1,0 +1,4373 @@
+openapi: 3.0.3
+info:
+  title: PortalInfo UHO
+  version: 1.0.0
+paths:
+  /api/{slug}:
+    get:
+      operationId: api_list
+      parameters:
+      - in: path
+        name: slug
+        schema:
+          type: string
+        required: true
+      tags:
+      - api
+      security:
+      - cookieAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PublicContent'
+          description: ''
+  /api/admin/access-logs/:
+    get:
+      operationId: api_admin_access_logs_list
+      parameters:
+      - in: query
+        name: content
+        schema:
+          type: integer
+      - in: query
+        name: data_scope
+        schema:
+          enum:
+          - real
+          - demo
+          - all
+          type: string
+          default: real
+          minLength: 1
+        description: |-
+          * `real` - real
+          * `demo` - demo
+          * `all` - all
+      - in: query
+        name: date_from
+        schema:
+          type: string
+          format: date
+      - in: query
+        name: date_to
+        schema:
+          type: string
+          format: date
+      - in: query
+        name: device
+        schema:
+          type: string
+      - in: query
+        name: event_type
+        schema:
+          type: string
+          enum:
+          - access
+          - view
+        description: |-
+          * `access` - Acceso
+          * `view` - Visualización
+      - name: ordering
+        required: false
+        in: query
+        description: Qué campo usar para ordenar los resultados.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: Un número de página dentro del conjunto de resultados paginado.
+        schema:
+          type: integer
+      - in: query
+        name: period
+        schema:
+          enum:
+          - today
+          - 7d
+          - 30d
+          - month
+          - custom
+          type: string
+          default: 7d
+          minLength: 1
+        description: |-
+          * `today` - today
+          * `7d` - 7d
+          * `30d` - 30d
+          * `month` - month
+          * `custom` - custom
+      - name: search
+        required: false
+        in: query
+        description: Un término de búsqueda.
+        schema:
+          type: string
+      - in: query
+        name: section
+        schema:
+          type: string
+      - in: query
+        name: uid
+        schema:
+          type: string
+      - in: query
+        name: user_type
+        schema:
+          type: string
+      tags:
+      - api
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedAccessLogList'
+          description: ''
+  /api/admin/access-logs/{id}/:
+    get:
+      operationId: api_admin_access_logs_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: Un valor de entero único que identifique este access log.
+        required: true
+      tags:
+      - api
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccessLog'
+          description: ''
+  /api/admin/approvals/:
+    get:
+      operationId: api_admin_approvals_list
+      parameters:
+      - in: query
+        name: author
+        schema:
+          type: number
+      - in: query
+        name: category
+        schema:
+          type: number
+      - in: query
+        name: date_from
+        schema:
+          type: string
+          format: date-time
+      - in: query
+        name: date_to
+        schema:
+          type: string
+          format: date-time
+      - name: ordering
+        required: false
+        in: query
+        description: Qué campo usar para ordenar los resultados.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: Un número de página dentro del conjunto de resultados paginado.
+        schema:
+          type: integer
+      - name: search
+        required: false
+        in: query
+        description: Un término de búsqueda.
+        schema:
+          type: string
+      - in: query
+        name: state
+        schema:
+          type: string
+          enum:
+          - approved
+          - pending
+          - rejected
+        description: |-
+          * `pending` - Pendiente
+          * `approved` - Aprobado
+          * `rejected` - Rechazado
+      tags:
+      - api
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedApprovalList'
+          description: ''
+  /api/admin/approvals/{id}/:
+    get:
+      operationId: api_admin_approvals_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: Un valor de entero único que identifique este approval.
+        required: true
+      tags:
+      - api
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Approval'
+          description: ''
+  /api/admin/approvals/{id}/decide/:
+    post:
+      operationId: api_admin_approvals_decide_create
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: Un valor de entero único que identifique este approval.
+        required: true
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Review'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Review'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Review'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Approval'
+          description: ''
+  /api/admin/approvals/authors/:
+    get:
+      operationId: api_admin_approvals_authors_retrieve
+      tags:
+      - api
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+  /api/admin/approvals/summary/:
+    get:
+      operationId: api_admin_approvals_summary_retrieve
+      tags:
+      - api
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+  /api/admin/audit/:
+    get:
+      operationId: api_admin_audit_list
+      parameters:
+      - in: query
+        name: action
+        schema:
+          type: string
+      - in: query
+        name: actor
+        schema:
+          type: integer
+      - in: query
+        name: entity
+        schema:
+          type: string
+      - name: ordering
+        required: false
+        in: query
+        description: Qué campo usar para ordenar los resultados.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: Un número de página dentro del conjunto de resultados paginado.
+        schema:
+          type: integer
+      - name: search
+        required: false
+        in: query
+        description: Un término de búsqueda.
+        schema:
+          type: string
+      tags:
+      - api
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedAuditList'
+          description: ''
+  /api/admin/audit/{id}/:
+    get:
+      operationId: api_admin_audit_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: Un valor de entero único que identifique este audit event.
+        required: true
+      tags:
+      - api
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Audit'
+          description: ''
+  /api/admin/catalog-items/:
+    get:
+      operationId: api_admin_catalog_items_list
+      parameters:
+      - in: query
+        name: active
+        schema:
+          type: boolean
+      - in: query
+        name: catalog
+        schema:
+          type: integer
+      - name: ordering
+        required: false
+        in: query
+        description: Qué campo usar para ordenar los resultados.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: Un número de página dentro del conjunto de resultados paginado.
+        schema:
+          type: integer
+      - in: query
+        name: parent
+        schema:
+          type: integer
+      - name: search
+        required: false
+        in: query
+        description: Un término de búsqueda.
+        schema:
+          type: string
+      tags:
+      - api
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedCatalogItemList'
+          description: ''
+    post:
+      operationId: api_admin_catalog_items_create
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CatalogItem'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/CatalogItem'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/CatalogItem'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CatalogItem'
+          description: ''
+  /api/admin/catalog-items/{id}/:
+    get:
+      operationId: api_admin_catalog_items_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: Un valor de entero único que identifique este catalog item.
+        required: true
+      tags:
+      - api
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CatalogItem'
+          description: ''
+    put:
+      operationId: api_admin_catalog_items_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: Un valor de entero único que identifique este catalog item.
+        required: true
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CatalogItem'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/CatalogItem'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/CatalogItem'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CatalogItem'
+          description: ''
+    patch:
+      operationId: api_admin_catalog_items_partial_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: Un valor de entero único que identifique este catalog item.
+        required: true
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedCatalogItem'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedCatalogItem'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedCatalogItem'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CatalogItem'
+          description: ''
+    delete:
+      operationId: api_admin_catalog_items_destroy
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: Un valor de entero único que identifique este catalog item.
+        required: true
+      tags:
+      - api
+      security:
+      - cookieAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/admin/catalog-types/:
+    get:
+      operationId: api_admin_catalog_types_list
+      parameters:
+      - name: ordering
+        required: false
+        in: query
+        description: Qué campo usar para ordenar los resultados.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: Un número de página dentro del conjunto de resultados paginado.
+        schema:
+          type: integer
+      - name: search
+        required: false
+        in: query
+        description: Un término de búsqueda.
+        schema:
+          type: string
+      tags:
+      - api
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedCatalogTypeList'
+          description: ''
+    post:
+      operationId: api_admin_catalog_types_create
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CatalogType'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/CatalogType'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/CatalogType'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CatalogType'
+          description: ''
+  /api/admin/catalog-types/{id}/:
+    get:
+      operationId: api_admin_catalog_types_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: Un valor de entero único que identifique este catalog type.
+        required: true
+      tags:
+      - api
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CatalogType'
+          description: ''
+    put:
+      operationId: api_admin_catalog_types_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: Un valor de entero único que identifique este catalog type.
+        required: true
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CatalogType'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/CatalogType'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/CatalogType'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CatalogType'
+          description: ''
+    patch:
+      operationId: api_admin_catalog_types_partial_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: Un valor de entero único que identifique este catalog type.
+        required: true
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedCatalogType'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedCatalogType'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedCatalogType'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CatalogType'
+          description: ''
+    delete:
+      operationId: api_admin_catalog_types_destroy
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: Un valor de entero único que identifique este catalog type.
+        required: true
+      tags:
+      - api
+      security:
+      - cookieAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/admin/categories/:
+    get:
+      operationId: api_admin_categories_list
+      parameters:
+      - in: query
+        name: active
+        schema:
+          type: boolean
+      - in: query
+        name: dynamic
+        schema:
+          type: boolean
+      - name: ordering
+        required: false
+        in: query
+        description: Qué campo usar para ordenar los resultados.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: Un número de página dentro del conjunto de resultados paginado.
+        schema:
+          type: integer
+      - name: search
+        required: false
+        in: query
+        description: Un término de búsqueda.
+        schema:
+          type: string
+      - in: query
+        name: visible
+        schema:
+          type: boolean
+      tags:
+      - api
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedCategoryList'
+          description: ''
+    post:
+      operationId: api_admin_categories_create
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Category'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Category'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Category'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Category'
+          description: ''
+  /api/admin/categories/{id}/:
+    get:
+      operationId: api_admin_categories_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: Un valor de entero único que identifique este category.
+        required: true
+      tags:
+      - api
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Category'
+          description: ''
+    put:
+      operationId: api_admin_categories_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: Un valor de entero único que identifique este category.
+        required: true
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Category'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Category'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Category'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Category'
+          description: ''
+    patch:
+      operationId: api_admin_categories_partial_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: Un valor de entero único que identifique este category.
+        required: true
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedCategory'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedCategory'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedCategory'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Category'
+          description: ''
+    delete:
+      operationId: api_admin_categories_destroy
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: Un valor de entero único que identifique este category.
+        required: true
+      tags:
+      - api
+      security:
+      - cookieAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/admin/content-metadata/:
+    get:
+      operationId: api_admin_content_metadata_retrieve
+      tags:
+      - api
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+  /api/admin/contents/:
+    get:
+      operationId: api_admin_contents_list
+      parameters:
+      - in: query
+        name: area
+        schema:
+          type: number
+      - in: query
+        name: category
+        schema:
+          type: integer
+      - in: query
+        name: category__content_type
+        schema:
+          type: string
+          enum:
+          - event
+          - generic
+          - news
+          - notice
+          - service
+          - survey
+        description: |-
+          * `generic` - generic
+          * `news` - news
+          * `event` - event
+          * `notice` - notice
+          * `service` - service
+          * `survey` - survey
+      - in: query
+        name: date_from
+        schema:
+          type: string
+          format: date-time
+      - in: query
+        name: date_to
+        schema:
+          type: string
+          format: date-time
+      - in: query
+        name: event_from
+        schema:
+          type: string
+          format: date-time
+      - in: query
+        name: event_to
+        schema:
+          type: string
+          format: date-time
+      - in: query
+        name: manual_active
+        schema:
+          type: boolean
+      - name: ordering
+        required: false
+        in: query
+        description: Qué campo usar para ordenar los resultados.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: Un número de página dentro del conjunto de resultados paginado.
+        schema:
+          type: integer
+      - name: search
+        required: false
+        in: query
+        description: Un término de búsqueda.
+        schema:
+          type: string
+      - in: query
+        name: state
+        schema:
+          type: string
+          enum:
+          - approved
+          - draft
+          - hidden
+          - pending
+          - rejected
+        description: |-
+          * `draft` - Borrador
+          * `pending` - Pendiente
+          * `approved` - Aprobado
+          * `rejected` - Rechazado
+          * `hidden` - Oculto
+      - in: query
+        name: visibility
+        schema:
+          type: string
+          enum:
+          - active
+          - expired
+          - future
+          - hidden
+        description: |-
+          * `active` - Activos
+          * `hidden` - Ocultos
+          * `expired` - Vencidos
+          * `future` - Futuros
+      tags:
+      - api
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedContentList'
+          description: ''
+    post:
+      operationId: api_admin_contents_create
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Content'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Content'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Content'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Content'
+          description: ''
+  /api/admin/contents/{id}/:
+    get:
+      operationId: api_admin_contents_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: Un valor de entero único que identifique este content.
+        required: true
+      tags:
+      - api
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Content'
+          description: ''
+    put:
+      operationId: api_admin_contents_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: Un valor de entero único que identifique este content.
+        required: true
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Content'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Content'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Content'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Content'
+          description: ''
+    patch:
+      operationId: api_admin_contents_partial_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: Un valor de entero único que identifique este content.
+        required: true
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedContent'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedContent'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedContent'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Content'
+          description: ''
+    delete:
+      operationId: api_admin_contents_destroy
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: Un valor de entero único que identifique este content.
+        required: true
+      tags:
+      - api
+      security:
+      - cookieAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/admin/contents/{id}/comparison/:
+    get:
+      operationId: api_admin_contents_comparison_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: Un valor de entero único que identifique este content.
+        required: true
+      tags:
+      - api
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+  /api/admin/contents/{id}/history/:
+    get:
+      operationId: api_admin_contents_history_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: Un valor de entero único que identifique este content.
+        required: true
+      tags:
+      - api
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+  /api/admin/contents/{id}/open_answers/:
+    get:
+      operationId: api_admin_contents_open_answers_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: Un valor de entero único que identifique este content.
+        required: true
+      tags:
+      - api
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+  /api/admin/contents/{id}/results/:
+    get:
+      operationId: api_admin_contents_results_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: Un valor de entero único que identifique este content.
+        required: true
+      tags:
+      - api
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+  /api/admin/contents/{id}/review/:
+    post:
+      operationId: api_admin_contents_review_create
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: Un valor de entero único que identifique este content.
+        required: true
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Review'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Review'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Review'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Content'
+          description: ''
+  /api/admin/contents/{id}/submit/:
+    post:
+      operationId: api_admin_contents_submit_create
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: Un valor de entero único que identifique este content.
+        required: true
+      tags:
+      - api
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SubmitResult'
+          description: ''
+  /api/admin/contents/{id}/visibility/:
+    post:
+      operationId: api_admin_contents_visibility_create
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: Un valor de entero único que identifique este content.
+        required: true
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Visibility'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Visibility'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Visibility'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Content'
+          description: ''
+  /api/admin/dashboard/:
+    get:
+      operationId: api_admin_dashboard_retrieve
+      tags:
+      - api
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+  /api/admin/estadisticas:
+    get:
+      operationId: api_admin_estadisticas_retrieve
+      parameters:
+      - in: query
+        name: data_scope
+        schema:
+          enum:
+          - real
+          - demo
+          - all
+          type: string
+          default: real
+          minLength: 1
+        description: |-
+          * `real` - real
+          * `demo` - demo
+          * `all` - all
+      - in: query
+        name: date_from
+        schema:
+          type: string
+          format: date
+      - in: query
+        name: date_to
+        schema:
+          type: string
+          format: date
+      - in: query
+        name: period
+        schema:
+          enum:
+          - today
+          - 7d
+          - 30d
+          - month
+          - custom
+          type: string
+          default: 7d
+          minLength: 1
+        description: |-
+          * `today` - today
+          * `7d` - 7d
+          * `30d` - 30d
+          * `month` - month
+          * `custom` - custom
+      tags:
+      - api
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+  /api/admin/logs:
+    get:
+      operationId: api_admin_logs_list
+      parameters:
+      - in: query
+        name: content
+        schema:
+          type: integer
+      - in: query
+        name: data_scope
+        schema:
+          enum:
+          - real
+          - demo
+          - all
+          type: string
+          default: real
+          minLength: 1
+        description: |-
+          * `real` - real
+          * `demo` - demo
+          * `all` - all
+      - in: query
+        name: date_from
+        schema:
+          type: string
+          format: date
+      - in: query
+        name: date_to
+        schema:
+          type: string
+          format: date
+      - in: query
+        name: device
+        schema:
+          type: string
+      - in: query
+        name: event_type
+        schema:
+          type: string
+          enum:
+          - access
+          - view
+        description: |-
+          * `access` - Acceso
+          * `view` - Visualización
+      - name: ordering
+        required: false
+        in: query
+        description: Qué campo usar para ordenar los resultados.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: Un número de página dentro del conjunto de resultados paginado.
+        schema:
+          type: integer
+      - in: query
+        name: period
+        schema:
+          enum:
+          - today
+          - 7d
+          - 30d
+          - month
+          - custom
+          type: string
+          default: 7d
+          minLength: 1
+        description: |-
+          * `today` - today
+          * `7d` - 7d
+          * `30d` - 30d
+          * `month` - month
+          * `custom` - custom
+      - name: search
+        required: false
+        in: query
+        description: Un término de búsqueda.
+        schema:
+          type: string
+      - in: query
+        name: section
+        schema:
+          type: string
+      - in: query
+        name: uid
+        schema:
+          type: string
+      - in: query
+        name: user_type
+        schema:
+          type: string
+      tags:
+      - api
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedAccessLogList'
+          description: ''
+  /api/admin/notifications/:
+    get:
+      operationId: api_admin_notifications_list
+      parameters:
+      - in: query
+        name: kind
+        schema:
+          type: string
+      - name: ordering
+        required: false
+        in: query
+        description: Qué campo usar para ordenar los resultados.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: Un número de página dentro del conjunto de resultados paginado.
+        schema:
+          type: integer
+      - in: query
+        name: read
+        schema:
+          type: boolean
+      - name: search
+        required: false
+        in: query
+        description: Un término de búsqueda.
+        schema:
+          type: string
+      tags:
+      - api
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedNotificationList'
+          description: ''
+  /api/admin/notifications/{id}/:
+    get:
+      operationId: api_admin_notifications_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: Un valor de entero único que identifique este notification.
+        required: true
+      tags:
+      - api
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Notification'
+          description: ''
+  /api/admin/notifications/{id}/mark_read/:
+    post:
+      operationId: api_admin_notifications_mark_read_create
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: Un valor de entero único que identifique este notification.
+        required: true
+      tags:
+      - api
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Notification'
+          description: ''
+  /api/admin/notifications/mark_all_read/:
+    post:
+      operationId: api_admin_notifications_mark_all_read_create
+      tags:
+      - api
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+  /api/admin/notifications/unread/:
+    get:
+      operationId: api_admin_notifications_unread_retrieve
+      tags:
+      - api
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+  /api/admin/permissions/:
+    get:
+      operationId: api_admin_permissions_list
+      parameters:
+      - in: query
+        name: category
+        schema:
+          type: integer
+      - in: query
+        name: operation
+        schema:
+          type: string
+          enum:
+          - create
+          - delete
+          - edit
+          - submit
+          - view
+        description: |-
+          * `view` - Consultar
+          * `create` - Crear
+          * `edit` - Editar
+          * `delete` - Eliminar
+          * `submit` - Enviar a aprobación
+      - name: ordering
+        required: false
+        in: query
+        description: Qué campo usar para ordenar los resultados.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: Un número de página dentro del conjunto de resultados paginado.
+        schema:
+          type: integer
+      - in: query
+        name: role
+        schema:
+          type: integer
+      - name: search
+        required: false
+        in: query
+        description: Un término de búsqueda.
+        schema:
+          type: string
+      - in: query
+        name: user
+        schema:
+          type: integer
+      tags:
+      - api
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedGrantList'
+          description: ''
+    post:
+      operationId: api_admin_permissions_create
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Grant'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Grant'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Grant'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Grant'
+          description: ''
+  /api/admin/permissions/{id}/:
+    get:
+      operationId: api_admin_permissions_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: Un valor de entero único que identifique este grant.
+        required: true
+      tags:
+      - api
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Grant'
+          description: ''
+    put:
+      operationId: api_admin_permissions_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: Un valor de entero único que identifique este grant.
+        required: true
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Grant'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Grant'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Grant'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Grant'
+          description: ''
+    patch:
+      operationId: api_admin_permissions_partial_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: Un valor de entero único que identifique este grant.
+        required: true
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedGrant'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedGrant'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedGrant'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Grant'
+          description: ''
+    delete:
+      operationId: api_admin_permissions_destroy
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: Un valor de entero único que identifique este grant.
+        required: true
+      tags:
+      - api
+      security:
+      - cookieAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/admin/reports/{kind}/:
+    get:
+      operationId: api_admin_reports_retrieve
+      parameters:
+      - in: query
+        name: action
+        schema:
+          type: string
+          minLength: 1
+      - in: query
+        name: actor
+        schema:
+          type: integer
+      - in: query
+        name: category
+        schema:
+          type: integer
+      - in: query
+        name: content
+        schema:
+          type: integer
+      - in: query
+        name: data_scope
+        schema:
+          enum:
+          - real
+          - demo
+          - all
+          type: string
+          default: real
+          minLength: 1
+        description: |-
+          * `real` - real
+          * `demo` - demo
+          * `all` - all
+      - in: query
+        name: date_from
+        schema:
+          type: string
+          format: date
+      - in: query
+        name: date_to
+        schema:
+          type: string
+          format: date
+      - in: query
+        name: device
+        schema:
+          type: string
+          minLength: 1
+      - in: query
+        name: entity
+        schema:
+          type: string
+          minLength: 1
+      - in: query
+        name: event_type
+        schema:
+          enum:
+          - access
+          - view
+          type: string
+          minLength: 1
+        description: |-
+          * `access` - access
+          * `view` - view
+      - in: query
+        name: file_format
+        schema:
+          enum:
+          - csv
+          - pdf
+          type: string
+          default: csv
+          minLength: 1
+        description: |-
+          * `csv` - csv
+          * `pdf` - pdf
+      - in: path
+        name: kind
+        schema:
+          type: string
+        required: true
+      - in: query
+        name: period
+        schema:
+          enum:
+          - today
+          - 7d
+          - 30d
+          - month
+          - custom
+          type: string
+          default: 7d
+          minLength: 1
+        description: |-
+          * `today` - today
+          * `7d` - 7d
+          * `30d` - 30d
+          * `month` - month
+          * `custom` - custom
+      - in: query
+        name: priority
+        schema:
+          enum:
+          - low
+          - medium
+          - high
+          type: string
+          minLength: 1
+        description: |-
+          * `low` - low
+          * `medium` - medium
+          * `high` - high
+      - in: query
+        name: reviewed
+        schema:
+          type: boolean
+      - in: query
+        name: search
+        schema:
+          type: string
+          minLength: 1
+      - in: query
+        name: section
+        schema:
+          type: string
+          minLength: 1
+      - in: query
+        name: state
+        schema:
+          type: string
+          minLength: 1
+      - in: query
+        name: uid
+        schema:
+          type: string
+          minLength: 1
+      - in: query
+        name: user_type
+        schema:
+          type: string
+          minLength: 1
+      tags:
+      - api
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            text/csv:
+              schema:
+                type: string
+                format: binary
+            application/pdf:
+              schema:
+                type: string
+                format: binary
+          description: ''
+  /api/admin/roles/:
+    get:
+      operationId: api_admin_roles_list
+      parameters:
+      - name: ordering
+        required: false
+        in: query
+        description: Qué campo usar para ordenar los resultados.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: Un número de página dentro del conjunto de resultados paginado.
+        schema:
+          type: integer
+      - name: search
+        required: false
+        in: query
+        description: Un término de búsqueda.
+        schema:
+          type: string
+      tags:
+      - api
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedRoleList'
+          description: ''
+  /api/admin/roles/{id}/:
+    get:
+      operationId: api_admin_roles_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: Un valor de entero único que identifique este role.
+        required: true
+      tags:
+      - api
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Role'
+          description: ''
+    patch:
+      operationId: api_admin_roles_partial_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: Un valor de entero único que identifique este role.
+        required: true
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedRole'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedRole'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedRole'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Role'
+          description: ''
+  /api/admin/security-alerts/:
+    get:
+      operationId: api_admin_security_alerts_list
+      parameters:
+      - in: query
+        name: data_scope
+        schema:
+          enum:
+          - real
+          - demo
+          - all
+          type: string
+          default: real
+          minLength: 1
+        description: |-
+          * `real` - real
+          * `demo` - demo
+          * `all` - all
+      - in: query
+        name: date_from
+        schema:
+          type: string
+          format: date
+      - in: query
+        name: date_to
+        schema:
+          type: string
+          format: date
+      - in: query
+        name: kind
+        schema:
+          type: string
+          enum:
+          - activity_spike
+          - device_churn
+          - multiple_ips
+        description: |-
+          * `multiple_ips` - Varias IP
+          * `device_churn` - Cambio de dispositivos
+          * `activity_spike` - Actividad inusual
+      - name: ordering
+        required: false
+        in: query
+        description: Qué campo usar para ordenar los resultados.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: Un número de página dentro del conjunto de resultados paginado.
+        schema:
+          type: integer
+      - in: query
+        name: period
+        schema:
+          enum:
+          - today
+          - 7d
+          - 30d
+          - month
+          - custom
+          type: string
+          default: 7d
+          minLength: 1
+        description: |-
+          * `today` - today
+          * `7d` - 7d
+          * `30d` - 30d
+          * `month` - month
+          * `custom` - custom
+      - in: query
+        name: priority
+        schema:
+          type: string
+          enum:
+          - high
+          - low
+          - medium
+        description: |-
+          * `low` - Baja
+          * `medium` - Media
+          * `high` - Alta
+      - in: query
+        name: reviewed
+        schema:
+          type: boolean
+      - name: search
+        required: false
+        in: query
+        description: Un término de búsqueda.
+        schema:
+          type: string
+      - in: query
+        name: uid
+        schema:
+          type: string
+      tags:
+      - api
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedSecurityAlertList'
+          description: ''
+  /api/admin/security-alerts/{id}/:
+    get:
+      operationId: api_admin_security_alerts_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: Un valor de entero único que identifique este security alert.
+        required: true
+      tags:
+      - api
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SecurityAlert'
+          description: ''
+  /api/admin/security-alerts/{id}/mark_reviewed/:
+    post:
+      operationId: api_admin_security_alerts_mark_reviewed_create
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: Un valor de entero único que identifique este security alert.
+        required: true
+      tags:
+      - api
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SecurityAlert'
+          description: ''
+  /api/admin/security-alerts/scan/:
+    post:
+      operationId: api_admin_security_alerts_scan_create
+      parameters:
+      - in: query
+        name: data_scope
+        schema:
+          enum:
+          - real
+          - demo
+          - all
+          type: string
+          default: real
+          minLength: 1
+        description: |-
+          * `real` - real
+          * `demo` - demo
+          * `all` - all
+      - in: query
+        name: date_from
+        schema:
+          type: string
+          format: date
+      - in: query
+        name: date_to
+        schema:
+          type: string
+          format: date
+      - in: query
+        name: period
+        schema:
+          enum:
+          - today
+          - 7d
+          - 30d
+          - month
+          - custom
+          type: string
+          default: 7d
+          minLength: 1
+        description: |-
+          * `today` - today
+          * `7d` - 7d
+          * `30d` - 30d
+          * `month` - month
+          * `custom` - custom
+      tags:
+      - api
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+  /api/admin/settings/:
+    get:
+      operationId: api_admin_settings_retrieve
+      tags:
+      - api
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Settings'
+          description: ''
+    patch:
+      operationId: api_admin_settings_partial_update
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedSettings'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedSettings'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedSettings'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Settings'
+          description: ''
+  /api/admin/users/:
+    get:
+      operationId: api_admin_users_list
+      parameters:
+      - in: query
+        name: authorized
+        schema:
+          type: boolean
+      - in: query
+        name: is_active
+        schema:
+          type: boolean
+      - name: ordering
+        required: false
+        in: query
+        description: Qué campo usar para ordenar los resultados.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: Un número de página dentro del conjunto de resultados paginado.
+        schema:
+          type: integer
+      - in: query
+        name: role
+        schema:
+          type: integer
+      - name: search
+        required: false
+        in: query
+        description: Un término de búsqueda.
+        schema:
+          type: string
+      tags:
+      - api
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedUserList'
+          description: ''
+    post:
+      operationId: api_admin_users_create
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/User'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/User'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+          description: ''
+  /api/admin/users/{id}/:
+    get:
+      operationId: api_admin_users_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: Un valor de entero único que identifique este usuario.
+        required: true
+      tags:
+      - api
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+          description: ''
+    put:
+      operationId: api_admin_users_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: Un valor de entero único que identifique este usuario.
+        required: true
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/User'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/User'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+          description: ''
+    patch:
+      operationId: api_admin_users_partial_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: Un valor de entero único que identifique este usuario.
+        required: true
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedUser'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedUser'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedUser'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+          description: ''
+    delete:
+      operationId: api_admin_users_destroy
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: Un valor de entero único que identifique este usuario.
+        required: true
+      tags:
+      - api
+      security:
+      - cookieAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/avisos:
+    get:
+      operationId: api_avisos_list
+      tags:
+      - api
+      security:
+      - cookieAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PublicContent'
+          description: ''
+  /api/categorias:
+    get:
+      operationId: api_categorias_list
+      parameters:
+      - in: query
+        name: include_contents
+        schema:
+          type: boolean
+        description: false devuelve solo metadatos; true conserva el contrato completo.
+      tags:
+      - api
+      security:
+      - cookieAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PublicCategory'
+          description: ''
+  /api/config:
+    get:
+      operationId: api_config_retrieve
+      tags:
+      - api
+      security:
+      - cookieAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+  /api/csrf/:
+    get:
+      operationId: api_csrf_retrieve
+      tags:
+      - api
+      security:
+      - cookieAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+  /api/demo/portal-access/:
+    post:
+      operationId: api_demo_portal_access_create
+      tags:
+      - api
+      security:
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+  /api/encuestas:
+    get:
+      operationId: api_encuestas_list
+      tags:
+      - api
+      security:
+      - cookieAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PublicContent'
+          description: ''
+  /api/encuestas/{id}/respuestas:
+    post:
+      operationId: api_encuestas_respuestas_create
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Vote'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Vote'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Vote'
+        required: true
+      security:
+      - cookieAuth: []
+      - {}
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+  /api/eventos:
+    get:
+      operationId: api_eventos_list
+      tags:
+      - api
+      security:
+      - cookieAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PublicContent'
+          description: ''
+  /api/health/:
+    get:
+      operationId: api_health_retrieve
+      tags:
+      - api
+      security:
+      - cookieAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+  /api/me/:
+    get:
+      operationId: api_me_retrieve
+      tags:
+      - api
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+          description: ''
+  /api/noticias:
+    get:
+      operationId: api_noticias_list
+      tags:
+      - api
+      security:
+      - cookieAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PublicContent'
+          description: ''
+  /api/schema/:
+    get:
+      operationId: api_schema_retrieve
+      description: |-
+        OpenApi3 schema for this API. Format can be selected via content negotiation.
+
+        - YAML: application/vnd.oai.openapi
+        - JSON: application/vnd.oai.openapi+json
+      parameters:
+      - in: query
+        name: format
+        schema:
+          type: string
+          enum:
+          - json
+          - yaml
+      - in: query
+        name: lang
+        schema:
+          type: string
+          enum:
+          - af
+          - ar
+          - ar-dz
+          - ast
+          - az
+          - be
+          - bg
+          - bn
+          - br
+          - bs
+          - ca
+          - ckb
+          - cs
+          - cy
+          - da
+          - de
+          - dsb
+          - el
+          - en
+          - en-au
+          - en-gb
+          - eo
+          - es
+          - es-ar
+          - es-co
+          - es-mx
+          - es-ni
+          - es-ve
+          - et
+          - eu
+          - fa
+          - fi
+          - fr
+          - fy
+          - ga
+          - gd
+          - gl
+          - he
+          - hi
+          - hr
+          - hsb
+          - hu
+          - hy
+          - ia
+          - id
+          - ig
+          - io
+          - is
+          - it
+          - ja
+          - ka
+          - kab
+          - kk
+          - km
+          - kn
+          - ko
+          - ky
+          - lb
+          - lt
+          - lv
+          - mk
+          - ml
+          - mn
+          - mr
+          - ms
+          - my
+          - nb
+          - ne
+          - nl
+          - nn
+          - os
+          - pa
+          - pl
+          - pt
+          - pt-br
+          - ro
+          - ru
+          - sk
+          - sl
+          - sq
+          - sr
+          - sr-latn
+          - sv
+          - sw
+          - ta
+          - te
+          - tg
+          - th
+          - tk
+          - tr
+          - tt
+          - udm
+          - ug
+          - uk
+          - ur
+          - uz
+          - vi
+          - zh-hans
+          - zh-hant
+      tags:
+      - api
+      security:
+      - cookieAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/vnd.oai.openapi:
+              schema:
+                type: object
+                additionalProperties: {}
+            application/yaml:
+              schema:
+                type: object
+                additionalProperties: {}
+            application/vnd.oai.openapi+json:
+              schema:
+                type: object
+                additionalProperties: {}
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+  /api/servicios:
+    get:
+      operationId: api_servicios_list
+      tags:
+      - api
+      security:
+      - cookieAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PublicContent'
+          description: ''
+  /api/vistas:
+    post:
+      operationId: api_vistas_create
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ViewInput'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ViewInput'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ViewInput'
+        required: true
+      security:
+      - cookieAuth: []
+      - {}
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+  /auth/login:
+    post:
+      operationId: auth_login_create
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Login'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Login'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Login'
+        required: true
+      security:
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+          description: ''
+  /auth/logout:
+    post:
+      operationId: auth_logout_create
+      tags:
+      - auth
+      security:
+      - cookieAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+  /portal-auth/logout:
+    post:
+      operationId: portal_auth_logout_create
+      tags:
+      - portal-auth
+      security:
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+  /portal-auth/session:
+    get:
+      operationId: portal_auth_session_retrieve
+      tags:
+      - portal-auth
+      security:
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+    post:
+      operationId: portal_auth_session_create
+      tags:
+      - portal-auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VisitorLogin'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/VisitorLogin'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/VisitorLogin'
+        required: true
+      security:
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+        '503':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+components:
+  schemas:
+    AccessLog:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        event_type:
+          $ref: '#/components/schemas/EventTypeEnum'
+        device:
+          type: string
+          maxLength: 20
+        demo:
+          type: boolean
+        seed_key:
+          type: string
+          nullable: true
+          maxLength: 120
+        uid:
+          type: string
+          maxLength: 150
+        user_type:
+          type: string
+          maxLength: 30
+        ip:
+          type: string
+        user_agent:
+          type: string
+          maxLength: 500
+        section:
+          type: string
+          maxLength: 100
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        content:
+          type: integer
+          nullable: true
+      required:
+      - created_at
+      - id
+      - ip
+      - user_agent
+    Answer:
+      type: object
+      properties:
+        question:
+          type: integer
+          minimum: 1
+        options:
+          type: array
+          items:
+            type: integer
+            minimum: 1
+          maxItems: 100
+        value:
+          type: string
+          default: ''
+          maxLength: 4000
+      required:
+      - question
+    Approval:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        content:
+          type: integer
+          readOnly: true
+        title:
+          type: string
+          readOnly: true
+        category:
+          type: string
+          readOnly: true
+        author:
+          type: string
+          readOnly: true
+        content_type:
+          type: string
+          readOnly: true
+        version:
+          type: integer
+          readOnly: true
+        state:
+          allOf:
+          - $ref: '#/components/schemas/ApprovalStateEnum'
+          readOnly: true
+        reason:
+          type: string
+          readOnly: true
+        reviewer:
+          type: integer
+          readOnly: true
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        reviewed_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        proposal:
+          readOnly: true
+        approved_version:
+          type: object
+          additionalProperties: {}
+          nullable: true
+          readOnly: true
+        current_revision:
+          type: integer
+          readOnly: true
+      required:
+      - approved_version
+      - author
+      - category
+      - content
+      - content_type
+      - created_at
+      - current_revision
+      - id
+      - proposal
+      - reason
+      - reviewed_at
+      - reviewer
+      - state
+      - title
+      - version
+    ApprovalStateEnum:
+      enum:
+      - pending
+      - approved
+      - rejected
+      type: string
+      description: |-
+        * `pending` - Pendiente
+        * `approved` - Aprobado
+        * `rejected` - Rechazado
+    Audit:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        entity:
+          type: string
+          maxLength: 50
+        action:
+          type: string
+          maxLength: 100
+        resource:
+          type: string
+          maxLength: 150
+        ip:
+          type: string
+          nullable: true
+        user_agent:
+          type: string
+          maxLength: 500
+        metadata: {}
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        actor:
+          type: integer
+          nullable: true
+      required:
+      - action
+      - created_at
+      - id
+    CatalogItem:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          maxLength: 150
+        description:
+          type: string
+        active:
+          type: boolean
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        catalog:
+          type: integer
+        parent:
+          type: integer
+          nullable: true
+      required:
+      - catalog
+      - created_at
+      - id
+      - name
+    CatalogType:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          maxLength: 100
+        slug:
+          type: string
+          maxLength: 50
+          pattern: ^[-a-zA-Z0-9_]+$
+      required:
+      - id
+      - name
+      - slug
+    Category:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        content_type:
+          allOf:
+          - $ref: '#/components/schemas/ContentTypeEnum'
+          readOnly: true
+        name:
+          type: string
+          maxLength: 100
+        slug:
+          type: string
+          maxLength: 50
+          pattern: ^[-a-zA-Z0-9_]+$
+        description:
+          type: string
+        active:
+          type: boolean
+        visible:
+          type: boolean
+        dynamic:
+          type: boolean
+          readOnly: true
+        max_visible:
+          type: integer
+          maximum: 2147483647
+          minimum: 1
+        title_limit:
+          type: integer
+          maximum: 2147483647
+          minimum: 1
+        description_limit:
+          type: integer
+          maximum: 2147483647
+          minimum: 1
+        required_fields: {}
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - content_type
+      - created_at
+      - dynamic
+      - id
+      - name
+      - slug
+    CodeEnum:
+      enum:
+      - superadmin
+      - admin
+      - gestor
+      type: string
+      description: |-
+        * `superadmin` - Superadmin
+        * `admin` - Admin
+        * `gestor` - Gestor de Contenidos
+    Content:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        category:
+          type: integer
+        category_name:
+          type: string
+          readOnly: true
+        content_type:
+          type: string
+          readOnly: true
+        title:
+          type: string
+        description:
+          type: string
+        author:
+          type: integer
+          readOnly: true
+        state:
+          allOf:
+          - $ref: '#/components/schemas/ContentStateEnum'
+          readOnly: true
+        revision:
+          type: integer
+          readOnly: true
+        validity:
+          $ref: '#/components/schemas/ValidityEnum'
+        starts_at:
+          type: string
+          format: date-time
+        ends_at:
+          type: string
+          format: date-time
+          nullable: true
+        manual_active:
+          type: boolean
+        extra_fields: {}
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+        submitted_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        details: {}
+        public_visible:
+          type: boolean
+          readOnly: true
+        has_published_version:
+          type: boolean
+          readOnly: true
+        permissions:
+          type: array
+          items:
+            type: string
+          readOnly: true
+      required:
+      - author
+      - category
+      - category_name
+      - content_type
+      - created_at
+      - description
+      - has_published_version
+      - id
+      - permissions
+      - public_visible
+      - revision
+      - state
+      - submitted_at
+      - title
+      - updated_at
+    ContentStateEnum:
+      enum:
+      - draft
+      - pending
+      - approved
+      - rejected
+      - hidden
+      type: string
+      description: |-
+        * `draft` - Borrador
+        * `pending` - Pendiente
+        * `approved` - Aprobado
+        * `rejected` - Rechazado
+        * `hidden` - Oculto
+    ContentTypeEnum:
+      enum:
+      - generic
+      - news
+      - event
+      - notice
+      - service
+      - survey
+      type: string
+      description: |-
+        * `generic` - generic
+        * `news` - news
+        * `event` - event
+        * `notice` - notice
+        * `service` - service
+        * `survey` - survey
+    EventTypeEnum:
+      enum:
+      - access
+      - view
+      type: string
+      description: |-
+        * `access` - Acceso
+        * `view` - Visualización
+    Grant:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        user:
+          type: integer
+          nullable: true
+        role:
+          type: integer
+          nullable: true
+        category:
+          type: integer
+        operation:
+          $ref: '#/components/schemas/OperationEnum'
+      required:
+      - category
+      - id
+      - operation
+    KindEnum:
+      enum:
+      - multiple_ips
+      - device_churn
+      - activity_spike
+      type: string
+      description: |-
+        * `multiple_ips` - Varias IP
+        * `device_churn` - Cambio de dispositivos
+        * `activity_spike` - Actividad inusual
+    Login:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+          maxLength: 254
+        password:
+          type: string
+          writeOnly: true
+          maxLength: 256
+      required:
+      - email
+      - password
+    Notification:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        kind:
+          type: string
+          readOnly: true
+        title:
+          type: string
+          readOnly: true
+        message:
+          type: string
+          readOnly: true
+        resource_type:
+          type: string
+          readOnly: true
+        resource_id:
+          type: integer
+          readOnly: true
+          nullable: true
+        read:
+          type: boolean
+          readOnly: true
+        read_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        demo:
+          type: boolean
+          readOnly: true
+        mail_state:
+          type: string
+          readOnly: true
+          default: disabled
+      required:
+      - created_at
+      - demo
+      - id
+      - kind
+      - mail_state
+      - message
+      - read
+      - read_at
+      - resource_id
+      - resource_type
+      - title
+    OperationEnum:
+      enum:
+      - view
+      - create
+      - edit
+      - delete
+      - submit
+      type: string
+      description: |-
+        * `view` - Consultar
+        * `create` - Crear
+        * `edit` - Editar
+        * `delete` - Eliminar
+        * `submit` - Enviar a aprobación
+    PaginatedAccessLogList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/AccessLog'
+    PaginatedApprovalList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Approval'
+    PaginatedAuditList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Audit'
+    PaginatedCatalogItemList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/CatalogItem'
+    PaginatedCatalogTypeList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/CatalogType'
+    PaginatedCategoryList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Category'
+    PaginatedContentList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Content'
+    PaginatedGrantList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Grant'
+    PaginatedNotificationList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Notification'
+    PaginatedRoleList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Role'
+    PaginatedSecurityAlertList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/SecurityAlert'
+    PaginatedUserList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/User'
+    PatchedCatalogItem:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          maxLength: 150
+        description:
+          type: string
+        active:
+          type: boolean
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        catalog:
+          type: integer
+        parent:
+          type: integer
+          nullable: true
+    PatchedCatalogType:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          maxLength: 100
+        slug:
+          type: string
+          maxLength: 50
+          pattern: ^[-a-zA-Z0-9_]+$
+    PatchedCategory:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        content_type:
+          allOf:
+          - $ref: '#/components/schemas/ContentTypeEnum'
+          readOnly: true
+        name:
+          type: string
+          maxLength: 100
+        slug:
+          type: string
+          maxLength: 50
+          pattern: ^[-a-zA-Z0-9_]+$
+        description:
+          type: string
+        active:
+          type: boolean
+        visible:
+          type: boolean
+        dynamic:
+          type: boolean
+          readOnly: true
+        max_visible:
+          type: integer
+          maximum: 2147483647
+          minimum: 1
+        title_limit:
+          type: integer
+          maximum: 2147483647
+          minimum: 1
+        description_limit:
+          type: integer
+          maximum: 2147483647
+          minimum: 1
+        required_fields: {}
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+    PatchedContent:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        category:
+          type: integer
+        category_name:
+          type: string
+          readOnly: true
+        content_type:
+          type: string
+          readOnly: true
+        title:
+          type: string
+        description:
+          type: string
+        author:
+          type: integer
+          readOnly: true
+        state:
+          allOf:
+          - $ref: '#/components/schemas/ContentStateEnum'
+          readOnly: true
+        revision:
+          type: integer
+          readOnly: true
+        validity:
+          $ref: '#/components/schemas/ValidityEnum'
+        starts_at:
+          type: string
+          format: date-time
+        ends_at:
+          type: string
+          format: date-time
+          nullable: true
+        manual_active:
+          type: boolean
+        extra_fields: {}
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+        submitted_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        details: {}
+        public_visible:
+          type: boolean
+          readOnly: true
+        has_published_version:
+          type: boolean
+          readOnly: true
+        permissions:
+          type: array
+          items:
+            type: string
+          readOnly: true
+    PatchedGrant:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        user:
+          type: integer
+          nullable: true
+        role:
+          type: integer
+          nullable: true
+        category:
+          type: integer
+        operation:
+          $ref: '#/components/schemas/OperationEnum'
+    PatchedRole:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        code:
+          allOf:
+          - $ref: '#/components/schemas/CodeEnum'
+          readOnly: true
+        name:
+          type: string
+          maxLength: 100
+    PatchedSettings:
+      type: object
+      properties:
+        default_validity_days:
+          type: integer
+          maximum: 3650
+          minimum: 1
+        security_window_minutes:
+          type: integer
+          maximum: 1440
+          minimum: 5
+        security_ip_threshold:
+          type: integer
+          maximum: 100
+          minimum: 2
+        security_device_threshold:
+          type: integer
+          maximum: 100
+          minimum: 2
+        security_activity_threshold:
+          type: integer
+          maximum: 100000
+          minimum: 2
+        security_activity_multiplier:
+          type: integer
+          maximum: 100
+          minimum: 2
+        max_questions:
+          type: integer
+          maximum: 100
+          minimum: 1
+        max_options:
+          type: integer
+          maximum: 100
+          minimum: 2
+        allow_open_questions:
+          type: boolean
+        vote_requires_auth:
+          type: boolean
+        login_attempts:
+          type: integer
+          maximum: 20
+          minimum: 1
+        lockout_seconds:
+          type: integer
+          maximum: 86400
+          minimum: 30
+        session_seconds:
+          type: integer
+          maximum: 86400
+          minimum: 60
+        retention_days:
+          type: integer
+          maximum: 2147483647
+          minimum: 1
+        portal_url:
+          oneOf:
+          - type: string
+            format: uri
+            maxLength: 200
+          - type: string
+            maxLength: 0
+        email_notifications:
+          type: boolean
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+    PatchedUser:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        email:
+          type: string
+          format: email
+          pattern: ^[^@\s]+@uho\.edu\.cu$
+          maxLength: 254
+        role:
+          type: integer
+          nullable: true
+        role_name:
+          type: string
+          readOnly: true
+        role_code:
+          type: string
+          readOnly: true
+        is_active:
+          type: boolean
+          title: Activo
+          description: Indica si el usuario debe ser tratado como activo. Desmarque
+            esta opción en lugar de borrar la cuenta.
+        authorized:
+          type: boolean
+        demo:
+          type: boolean
+          readOnly: true
+        protected:
+          type: boolean
+          readOnly: true
+        categories:
+          type: array
+          items:
+            type: integer
+        last_login:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+          title: Último inicio de sesión
+        password:
+          type: string
+          writeOnly: true
+    PriorityEnum:
+      enum:
+      - low
+      - medium
+      - high
+      type: string
+      description: |-
+        * `low` - Baja
+        * `medium` - Media
+        * `high` - Alta
+    PublicCategory:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        slug:
+          type: string
+        content_type:
+          type: string
+        dynamic:
+          type: boolean
+        description:
+          type: string
+        max_visible:
+          type: integer
+        contents:
+          type: array
+          items:
+            $ref: '#/components/schemas/PublicContent'
+      required:
+      - content_type
+      - contents
+      - description
+      - dynamic
+      - id
+      - max_visible
+      - name
+      - slug
+    PublicContent:
+      type: object
+      properties:
+        id:
+          type: integer
+        category:
+          type: integer
+        category_slug:
+          type: string
+        type:
+          type: string
+        title:
+          type: string
+        description:
+          type: string
+        starts_at:
+          type: string
+          format: date-time
+        ends_at:
+          type: string
+          format: date-time
+          nullable: true
+        version:
+          type: integer
+        details: {}
+        extra_fields: {}
+      required:
+      - category
+      - category_slug
+      - description
+      - details
+      - ends_at
+      - extra_fields
+      - id
+      - starts_at
+      - title
+      - type
+      - version
+    Review:
+      type: object
+      properties:
+        approved:
+          type: boolean
+        reason:
+          type: string
+          default: ''
+          maxLength: 2000
+      required:
+      - approved
+    Role:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        code:
+          allOf:
+          - $ref: '#/components/schemas/CodeEnum'
+          readOnly: true
+        name:
+          type: string
+          maxLength: 100
+      required:
+      - code
+      - id
+      - name
+    SecurityAlert:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        uid:
+          type: string
+          readOnly: true
+        kind:
+          allOf:
+          - $ref: '#/components/schemas/KindEnum'
+          readOnly: true
+        priority:
+          allOf:
+          - $ref: '#/components/schemas/PriorityEnum'
+          readOnly: true
+        window_start:
+          type: string
+          format: date-time
+          readOnly: true
+        window_end:
+          type: string
+          format: date-time
+          readOnly: true
+        evidence:
+          readOnly: true
+        reviewed_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        reviewed_by:
+          type: integer
+          readOnly: true
+          nullable: true
+        demo:
+          type: boolean
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - created_at
+      - demo
+      - evidence
+      - id
+      - kind
+      - priority
+      - reviewed_at
+      - reviewed_by
+      - uid
+      - window_end
+      - window_start
+    Settings:
+      type: object
+      properties:
+        default_validity_days:
+          type: integer
+          maximum: 3650
+          minimum: 1
+        security_window_minutes:
+          type: integer
+          maximum: 1440
+          minimum: 5
+        security_ip_threshold:
+          type: integer
+          maximum: 100
+          minimum: 2
+        security_device_threshold:
+          type: integer
+          maximum: 100
+          minimum: 2
+        security_activity_threshold:
+          type: integer
+          maximum: 100000
+          minimum: 2
+        security_activity_multiplier:
+          type: integer
+          maximum: 100
+          minimum: 2
+        max_questions:
+          type: integer
+          maximum: 100
+          minimum: 1
+        max_options:
+          type: integer
+          maximum: 100
+          minimum: 2
+        allow_open_questions:
+          type: boolean
+        vote_requires_auth:
+          type: boolean
+        login_attempts:
+          type: integer
+          maximum: 20
+          minimum: 1
+        lockout_seconds:
+          type: integer
+          maximum: 86400
+          minimum: 30
+        session_seconds:
+          type: integer
+          maximum: 86400
+          minimum: 60
+        retention_days:
+          type: integer
+          maximum: 2147483647
+          minimum: 1
+        portal_url:
+          oneOf:
+          - type: string
+            format: uri
+            maxLength: 200
+          - type: string
+            maxLength: 0
+        email_notifications:
+          type: boolean
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - default_validity_days
+      - updated_at
+    SubmitResult:
+      type: object
+      properties:
+        content:
+          $ref: '#/components/schemas/Content'
+        warning:
+          type: string
+      required:
+      - content
+      - warning
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        email:
+          type: string
+          format: email
+          pattern: ^[^@\s]+@uho\.edu\.cu$
+          maxLength: 254
+        role:
+          type: integer
+          nullable: true
+        role_name:
+          type: string
+          readOnly: true
+        role_code:
+          type: string
+          readOnly: true
+        is_active:
+          type: boolean
+          title: Activo
+          description: Indica si el usuario debe ser tratado como activo. Desmarque
+            esta opción en lugar de borrar la cuenta.
+        authorized:
+          type: boolean
+        demo:
+          type: boolean
+          readOnly: true
+        protected:
+          type: boolean
+          readOnly: true
+        categories:
+          type: array
+          items:
+            type: integer
+        last_login:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+          title: Último inicio de sesión
+        password:
+          type: string
+          writeOnly: true
+      required:
+      - demo
+      - email
+      - id
+      - last_login
+      - protected
+      - role_code
+      - role_name
+    ValidityEnum:
+      enum:
+      - default
+      - today
+      - three_days
+      - week
+      - month
+      - always
+      - custom
+      type: string
+      description: |-
+        * `default` - default
+        * `today` - today
+        * `three_days` - three_days
+        * `week` - week
+        * `month` - month
+        * `always` - always
+        * `custom` - custom
+    ViewInput:
+      type: object
+      properties:
+        section:
+          type: string
+          maxLength: 100
+          pattern: ^[-a-zA-Z0-9_]+$
+        content:
+          type: integer
+          minimum: 1
+          nullable: true
+      required:
+      - section
+    Visibility:
+      type: object
+      properties:
+        manual_active:
+          type: boolean
+      required:
+      - manual_active
+    VisitorLogin:
+      type: object
+      properties:
+        username:
+          type: string
+          maxLength: 150
+        password:
+          type: string
+          writeOnly: true
+          maxLength: 256
+      required:
+      - password
+      - username
+    Vote:
+      type: object
+      properties:
+        answers:
+          type: array
+          items:
+            $ref: '#/components/schemas/Answer'
+      required:
+      - answers
+  securitySchemes:
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: sessionid

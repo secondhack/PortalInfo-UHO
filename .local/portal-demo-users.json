@@ -1,0 +1,20 @@
+{
+  "demo.estudiante": {
+    "full_name": "Estudiante de demostración",
+    "user_type": "estudiantes",
+    "active": true,
+    "password_hash": "pbkdf2_sha256$1000000$pQnP3jtwdWAeloY4vHPApj$w6IHznT0KaxFI4cOTJrQgmFGJyiUiMS1pRWVIGeSGz0="
+  },
+  "demo.trabajador": {
+    "full_name": "Trabajadora de demostración",
+    "user_type": "trabajadores",
+    "active": true,
+    "password_hash": "pbkdf2_sha256$1000000$YCbh9NJ2MDNAoVqhxTwQzD$Sp++IVuut8TcCdNs3fXxTx6C4KMfjWel2i7yv8mLKc0="
+  },
+  "demo.institucional": {
+    "full_name": "Visitante de demostración",
+    "user_type": "institucional",
+    "active": true,
+    "password_hash": "pbkdf2_sha256$1000000$09ki0eAY3XqKMdWzMw9dOg$tQNa3E7q7OaWtLKJfcdQwERCOsaCTbdWVIiHhK0SFJE="
+  }
+}

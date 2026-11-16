@@ -1,0 +1,891 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PortalInfo UHO – Mockup Interactivo</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Sora:wght@300;400;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap');
+  :root {
+    --blue:    #003366; --blue-med: #1565C0; --blue-lt: #E3F0FF;
+    --accent:  #FF6F00; --green: #1B873B; --red: #C62828;
+    --surface: #F4F7FB; --card: #FFFFFF; --text: #1A1A2E; --muted: #607D8B;
+    --border:  #D0DCE8; --sw: 240px;
+    --ff: 'DM Sans',sans-serif; --fd: 'Sora',sans-serif; --r: 12px;
+    --sh: 0 2px 16px rgba(0,51,102,.10);
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{font-family:var(--ff);background:#0D1B2E;color:var(--text);min-height:100vh;}
+
+  /* ── TOP NAV ─────────────────────────────────────────────────── */
+  #topnav{
+    position:fixed;top:0;left:0;right:0;z-index:900;height:52px;
+    background:linear-gradient(135deg,#003366,#1565C0);
+    display:flex;align-items:center;padding:0 16px;gap:0;
+    box-shadow:0 4px 20px rgba(0,0,0,.4);
+  }
+  #topnav .logo{font-family:var(--fd);font-weight:800;font-size:16px;color:#fff;
+    margin-right:20px;white-space:nowrap;letter-spacing:-.5px;}
+  #topnav .logo span{color:#FF6F00;}
+  .nav-tabs-wrap{display:flex;gap:2px;flex-wrap:wrap;flex:1;overflow:hidden;}
+  .ntab{
+    padding:5px 11px;border-radius:5px 5px 0 0;cursor:pointer;
+    font-size:11px;font-weight:600;color:rgba(255,255,255,.7);
+    background:rgba(255,255,255,.06);border:none;white-space:nowrap;
+    font-family:var(--ff);transition:all .2s;
+  }
+  .ntab:hover{background:rgba(255,255,255,.13);color:#fff;}
+  .ntab.active{background:var(--surface);color:var(--blue);font-weight:700;}
+
+  /* ── PAGE LAYOUT ─────────────────────────────────────────────── */
+  /* Two root views: #view-portal (full page) and #view-admin (sidebar+content) */
+  #view-portal,#view-login{
+    display:none;position:fixed;inset:0;top:52px;
+    overflow-y:auto;
+  }
+  #view-portal.on,#view-login.on{display:flex;align-items:center;justify-content:center;}
+  #view-portal{background:linear-gradient(160deg,#0D1B2E 0%,#1565C0 100%);}
+  #view-login{background:linear-gradient(160deg,#0D1B2E 0%,#1565C0 100%);}
+
+  /* Admin: sidebar fixed + scrollable content area */
+  #view-admin{
+    display:none;position:fixed;inset:0;top:52px;
+    flex-direction:row;
+  }
+  #view-admin.on{display:flex;}
+
+  #admin-sidebar{
+    width:var(--sw);min-width:var(--sw);background:var(--blue);color:#fff;
+    overflow-y:auto;flex-shrink:0;height:100%;
+  }
+  .sb-brand{padding:18px 16px;border-bottom:1px solid rgba(255,255,255,.1);
+    font-family:var(--fd);font-weight:800;font-size:14px;letter-spacing:-.5px;}
+  .sb-brand span{color:var(--accent);}
+  .sb-lbl{padding:14px 16px 5px;font-size:9px;font-weight:700;text-transform:uppercase;
+    letter-spacing:1.5px;color:rgba(255,255,255,.35);}
+  .sb-item{
+    display:flex;align-items:center;gap:10px;padding:9px 16px;
+    cursor:pointer;font-size:12px;color:rgba(255,255,255,.8);
+    border-left:3px solid transparent;transition:all .2s;
+  }
+  .sb-item:hover{background:rgba(255,255,255,.08);color:#fff;}
+  .sb-item.on{background:rgba(255,255,255,.12);border-left-color:var(--accent);color:#fff;font-weight:600;}
+  .sb-item .ico{font-size:15px;width:20px;text-align:center;}
+  .sb-badge{margin-left:auto;background:var(--accent);color:#fff;
+    font-size:9px;font-weight:700;padding:2px 6px;border-radius:10px;}
+
+  #admin-content{
+    flex:1;overflow-y:auto;background:var(--surface);
+    padding:24px;height:100%;
+  }
+
+  /* Panels (content sections inside admin) */
+  .panel{display:none;}
+  .panel.on{display:block;}
+
+  /* ── PORTAL CAUTIVO (phone mock) ─────────────────────────────── */
+  .phone{
+    width:370px;background:#fff;border-radius:28px;
+    box-shadow:0 28px 70px rgba(0,0,0,.6);
+    overflow:hidden;border:5px solid #1a2a3a;
+    margin:20px auto;
+  }
+  .ph-header{background:linear-gradient(135deg,#003366,#1565C0);
+    padding:18px 14px 14px;text-align:center;}
+  .ph-logo{display:inline-block;background:rgba(255,255,255,.15);border-radius:7px;
+    padding:5px 14px;font-family:var(--fd);font-weight:800;font-size:13px;color:#fff;margin-bottom:6px;}
+  .ph-title{font-family:var(--fd);font-size:12px;color:#fff;font-weight:700;}
+  .ph-sub{font-size:10px;color:rgba(255,255,255,.65);margin-top:2px;}
+
+  .ph-tabs{display:flex;background:#F0F4F8;border-bottom:1px solid #ddd;}
+  .ph-tab{flex:1;padding:9px 3px;text-align:center;font-size:9px;font-weight:600;
+    color:#607D8B;cursor:pointer;border-bottom:2px solid transparent;transition:all .2s;}
+  .ph-tab.on{color:#1565C0;border-bottom-color:#1565C0;background:#fff;}
+  .ph-tab .ti{font-size:13px;display:block;margin-bottom:1px;}
+
+  .ph-body{padding:14px;overflow-y:auto;max-height:460px;}
+  .ph-sec{display:none;} .ph-sec.on{display:block;}
+
+  /* Login form inside phone */
+  .pf-field{margin-bottom:11px;}
+  .pf-field label{display:block;font-size:9px;font-weight:600;color:#607D8B;margin-bottom:3px;}
+  .pf-field input{width:100%;padding:8px 10px;border:1.5px solid #D0DCE8;border-radius:7px;font-size:11px;font-family:var(--ff);background:#F8FAFB;}
+  .pf-field input:focus{border-color:#1565C0;outline:none;background:#fff;}
+  .btn-pf-login{width:100%;padding:9px;background:linear-gradient(135deg,#003366,#1565C0);
+    color:#fff;border:none;border-radius:7px;font-size:11px;font-weight:700;cursor:pointer;font-family:var(--ff);margin-top:3px;}
+  .ph-card{background:#F8FAFB;border:1px solid #E8EFF7;border-radius:9px;padding:11px;margin-bottom:9px;}
+  .ph-tag{display:inline-block;font-size:8px;font-weight:700;padding:2px 7px;border-radius:4px;margin-bottom:5px;}
+  .t-news{background:#E3F0FF;color:#1565C0;} .t-ev{background:#E8F5E9;color:#1B873B;}
+  .t-av{background:#FFF3E0;color:#FF6F00;} .t-sv{background:#F3E5F5;color:#6A1B9A;}
+  .t-enc{background:#FCE4EC;color:#AD1457;}
+  .ph-card-title{font-size:11px;font-weight:700;color:#003366;margin-bottom:3px;}
+  .ph-card-body{font-size:9px;color:#607D8B;line-height:1.5;}
+  .ph-card-meta{font-size:8px;color:#aaa;margin-top:5px;}
+  .ph-card-link{font-size:9px;color:#1565C0;font-weight:600;text-decoration:none;display:inline-block;margin-top:3px;}
+  .ph-avatar{width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,#003366,#1565C0);
+    margin:0 auto 7px;display:flex;align-items:center;justify-content:center;font-size:20px;color:#fff;font-weight:700;font-family:var(--fd);}
+  .btn-logout{padding:5px 18px;background:#fee;color:#c62828;border:1.5px solid #ffcdd2;
+    border-radius:5px;font-size:9px;font-weight:700;cursor:pointer;font-family:var(--ff);}
+  .sq{font-size:10px;font-weight:600;color:#003366;margin-bottom:7px;}
+  .so{display:flex;align-items:center;gap:7px;margin-bottom:5px;cursor:pointer;}
+  .so input[type=radio]{accent-color:#1565C0;}
+  .so label{font-size:9px;color:#333;cursor:pointer;}
+  .btn-survey{margin-top:7px;padding:6px 14px;background:#1565C0;color:#fff;
+    border:none;border-radius:5px;font-size:9px;font-weight:700;cursor:pointer;font-family:var(--ff);}
+
+  /* ── LOGIN ADMIN CARD ─────────────────────────────────────────── */
+  .lcard{background:#fff;border-radius:18px;padding:36px;width:370px;
+    box-shadow:0 28px 70px rgba(0,0,0,.4);}
+  .lcard-logo{text-align:center;margin-bottom:24px;}
+  .lcard-logobox{display:inline-block;background:linear-gradient(135deg,#003366,#1565C0);
+    border-radius:12px;padding:12px 18px;font-family:var(--fd);font-weight:800;font-size:20px;color:#fff;margin-bottom:8px;}
+  .lcard-logobox span{color:#FF6F00;}
+  .lcard-sub{font-size:11px;color:var(--muted);}
+  .lcard h2{font-family:var(--fd);font-size:18px;font-weight:700;color:var(--blue);text-align:center;margin-bottom:4px;}
+  .lcard-hint{font-size:11px;color:var(--muted);text-align:center;margin-bottom:20px;}
+  .aga-note{background:var(--blue-lt);border-radius:7px;padding:9px 12px;font-size:11px;color:var(--blue);margin-bottom:14px;}
+  .access-denied{background:#FFEBEE;border-radius:7px;padding:10px 14px;font-size:11px;color:#C62828;margin-top:14px;font-weight:600;display:flex;align-items:center;gap:7px;}
+
+  /* ── ADMIN PANEL COMMON ──────────────────────────────────────── */
+  .atop{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;}
+  .atop h1{font-family:var(--fd);font-size:20px;font-weight:800;color:var(--blue);}
+  .atop .acts{display:flex;align-items:center;gap:10px;}
+  .btn{padding:7px 16px;border-radius:7px;font-size:12px;font-weight:600;cursor:pointer;border:none;font-family:var(--ff);transition:all .2s;}
+  .btn-p{background:var(--blue);color:#fff;} .btn-p:hover{background:var(--blue-med);}
+  .btn-a{background:var(--accent);color:#fff;}
+  .btn-o{background:transparent;color:var(--blue);border:1.5px solid var(--blue);}
+  .btn-d{background:var(--red);color:#fff;}
+  .btn-s{background:var(--green);color:#fff;}
+  .btn-sm{padding:4px 10px;font-size:10px;border-radius:5px;}
+
+  .alert{padding:9px 13px;border-radius:7px;font-size:11px;margin-bottom:14px;}
+  .a-info{background:#E3F0FF;color:#1565C0;border:1px solid #BBDEFB;}
+  .a-warn{background:#FFF3E0;color:#E65100;border:1px solid #FFE0B2;}
+  .a-ok{background:#E8F5E9;color:#1B873B;border:1px solid #C8E6C9;}
+
+  .kgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;margin-bottom:20px;}
+  .kcard{background:var(--card);border-radius:var(--r);padding:18px;box-shadow:var(--sh);border:1px solid var(--border);}
+  .kcard .kl{font-size:10px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;}
+  .kcard .kv{font-family:var(--fd);font-size:28px;font-weight:800;}
+  .kcard .ks{font-size:10px;color:var(--muted);}
+
+  .pcard{background:var(--card);border-radius:var(--r);box-shadow:var(--sh);border:1px solid var(--border);margin-bottom:16px;}
+  .pcard-head{padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+  .pcard-head h3{font-family:var(--fd);font-size:14px;font-weight:700;color:var(--blue);}
+  .pcard-body{padding:18px;}
+
+  .dtbl{width:100%;border-collapse:collapse;font-size:12px;}
+  .dtbl th{background:#F0F4F8;padding:9px 12px;text-align:left;font-size:10px;font-weight:700;
+    text-transform:uppercase;letter-spacing:.4px;color:var(--muted);border-bottom:1px solid var(--border);}
+  .dtbl td{padding:10px 12px;border-bottom:1px solid #F0F4F8;color:var(--text);vertical-align:middle;}
+  .dtbl tr:last-child td{border-bottom:none;}
+  .dtbl tr:hover td{background:#FAFCFF;}
+
+  .badge{display:inline-flex;align-items:center;gap:3px;padding:3px 9px;border-radius:20px;font-size:10px;font-weight:700;}
+  .bg{background:#E8F5E9;color:#1B873B;} .bb{background:#E3F0FF;color:#1565C0;}
+  .bo{background:#FFF3E0;color:#FF6F00;} .br{background:#FFEBEE;color:#C62828;}
+  .bgr{background:#ECEFF1;color:#607D8B;}
+
+  .sw{position:relative;display:inline-block;width:34px;height:19px;}
+  .sw input{opacity:0;width:0;height:0;}
+  .sl{position:absolute;cursor:pointer;inset:0;background:#ccc;border-radius:19px;transition:.3s;}
+  .sl:before{position:absolute;content:"";height:13px;width:13px;left:3px;bottom:3px;background:#fff;border-radius:50%;transition:.3s;}
+  input:checked+.sl{background:var(--green);}
+  input:checked+.sl:before{transform:translateX(15px);}
+
+  .fg{margin-bottom:14px;}
+  .fl{display:block;font-size:11px;font-weight:600;color:var(--muted);margin-bottom:5px;}
+  .fc{width:100%;padding:8px 11px;border:1.5px solid var(--border);border-radius:7px;
+    font-size:12px;font-family:var(--ff);background:#FAFCFF;color:var(--text);transition:border-color .2s;}
+  .fc:focus{border-color:var(--blue-med);outline:none;background:#fff;}
+  .fr{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+  .fh{font-size:10px;color:var(--muted);margin-top:3px;}
+  .cc{font-size:10px;text-align:right;margin-top:2px;color:#90A4AE;}
+
+  .itabs{display:flex;gap:4px;margin-bottom:18px;}
+  .itab{padding:6px 14px;border-radius:7px;font-size:11px;font-weight:600;cursor:pointer;
+    color:var(--muted);background:var(--card);border:1.5px solid var(--border);transition:all .2s;}
+  .itab.on{background:var(--blue);color:#fff;border-color:var(--blue);}
+  .ipanel{display:none;} .ipanel.on{display:block;}
+
+  .acard{background:#FFFBF5;border:1.5px solid #FFE0B2;border-radius:9px;padding:13px;margin-bottom:11px;}
+  .acard-head{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:7px;}
+  .acard-title{font-size:12px;font-weight:700;color:var(--blue);}
+  .acard-body{font-size:11px;color:var(--muted);margin-bottom:9px;line-height:1.5;}
+  .acard-acts{display:flex;gap:7px;}
+
+  .cfg-row{display:flex;align-items:center;justify-content:space-between;padding:11px 0;border-bottom:1px solid var(--border);}
+  .cfg-row:last-child{border-bottom:none;}
+  .cfg-key{font-size:12px;font-weight:600;color:var(--text);}
+  .cfg-desc{font-size:10px;color:var(--muted);}
+  .mi{width:65px;padding:4px 7px;border:1.5px solid var(--border);border-radius:5px;font-size:11px;text-align:center;font-family:var(--ff);}
+
+  .ntag{display:inline-flex;align-items:center;gap:5px;background:var(--blue-lt);color:var(--blue);
+    border-radius:20px;padding:3px 11px;font-size:10px;font-weight:600;margin:3px;}
+  .ntag .x{cursor:pointer;color:#aaa;font-size:13px;line-height:1;}
+  .ntag .x:hover{color:var(--red);}
+
+  .bar-wrap{margin-bottom:9px;}
+  .bar-lbl{font-size:10px;font-weight:600;color:#333;margin-bottom:3px;display:flex;justify-content:space-between;}
+  .bar-bg{height:14px;border-radius:4px;background:#F0F4F8;overflow:hidden;}
+  .bar-fill{height:100%;border-radius:4px;background:linear-gradient(90deg,#1565C0,#003366);}
+
+  .notif-bell{position:relative;cursor:pointer;font-size:18px;}
+  .notif-n{position:absolute;top:-5px;right:-5px;background:var(--accent);color:#fff;
+    font-size:8px;font-weight:800;width:15px;height:15px;border-radius:50%;display:flex;align-items:center;justify-content:center;}
+  .uav{width:30px;height:30px;border-radius:50%;background:var(--blue-med);color:#fff;
+    display:inline-flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;}
+  .tag-on{display:inline-block;width:7px;height:7px;border-radius:50%;background:#1B873B;margin-right:5px;}
+  .tag-off{display:inline-block;width:7px;height:7px;border-radius:50%;background:#ccc;margin-right:5px;}
+  .cra{display:flex;gap:5px;align-items:center;}
+
+  /* charts */
+  .cbars{display:flex;gap:7px;align-items:flex-end;height:100px;padding:0 6px;}
+  .cbar{flex:1;border-radius:3px 3px 0 0;background:linear-gradient(180deg,#1565C0,#003366);cursor:pointer;transition:opacity .2s;}
+  .cbar:hover{opacity:.75;}
+  .clbls{display:flex;gap:7px;padding:5px 6px 0;}
+  .clbl{flex:1;font-size:8px;text-align:center;color:var(--muted);}
+  .pie{width:90px;height:90px;border-radius:50%;background:conic-gradient(#1565C0 0 55%,#FF6F00 55% 80%,#1B873B 80% 100%);}
+  .pie-wrap{display:flex;gap:20px;align-items:center;}
+  .leg{display:flex;flex-direction:column;gap:7px;}
+  .leg-i{display:flex;align-items:center;gap:7px;font-size:10px;}
+  .leg-d{width:11px;height:11px;border-radius:3px;}
+
+  /* modal */
+  .moverlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:2000;align-items:center;justify-content:center;}
+  .moverlay.on{display:flex;}
+  .modal{background:#fff;border-radius:14px;padding:26px;max-width:500px;width:92%;box-shadow:0 22px 56px rgba(0,0,0,.3);}
+  .modal h2{font-family:var(--fd);font-size:16px;font-weight:800;color:var(--blue);margin-bottom:18px;}
+  .modal-acts{display:flex;gap:9px;margin-top:22px;justify-content:flex-end;}
+</style>
+</head>
+<body>
+
+<!-- ══════════════════ TOP NAV ══════════════════ -->
+<div id="topnav">
+  <div class="logo">Portal<span>Info</span> UHO</div>
+  <div class="nav-tabs-wrap">
+    <button class="ntab" data-view="portal">📱 Portal Cautivo</button>
+    <button class="ntab" data-view="login">🔐 Login Admin</button>
+    <button class="ntab" data-view="admin" data-panel="dashboard">📊 Dashboard</button>
+    <button class="ntab" data-view="admin" data-panel="noticias">📰 Noticias</button>
+    <button class="ntab" data-view="admin" data-panel="eventos">📅 Eventos</button>
+    <button class="ntab" data-view="admin" data-panel="avisos">📢 Avisos</button>
+    <button class="ntab" data-view="admin" data-panel="servicios">🔗 Servicios</button>
+    <button class="ntab" data-view="admin" data-panel="encuestas">📋 Encuestas</button>
+    <button class="ntab" data-view="admin" data-panel="aprobacion">✅ Aprobación</button>
+    <button class="ntab" data-view="admin" data-panel="estadisticas">📈 Estadísticas</button>
+    <button class="ntab" data-view="admin" data-panel="usuarios">👥 Usuarios</button>
+    <button class="ntab" data-view="admin" data-panel="configuracion">⚙️ Configuración</button>
+    <button class="ntab" data-view="admin" data-panel="nomencladores">🗂️ Nomencladores</button>
+  </div>
+</div>
+
+<!-- ══════════════════ VIEW: PORTAL CAUTIVO ══════════════════ -->
+<div id="view-portal">
+  <div>
+    <div class="phone">
+      <div class="ph-header">
+        <div class="ph-logo">UHO</div>
+        <div class="ph-title">Universidad de Holguín</div>
+        <div class="ph-sub">Red WiFi Institucional · portal.uho.edu.cu</div>
+      </div>
+      <div class="ph-tabs" id="ph-tabs">
+        <div class="ph-tab on" onclick="phTab('login')"><span class="ti">🔑</span>Login</div>
+        <div class="ph-tab" onclick="phTab('noticias')"><span class="ti">📰</span>Noticias</div>
+        <div class="ph-tab" onclick="phTab('eventos')"><span class="ti">📅</span>Eventos</div>
+        <div class="ph-tab" onclick="phTab('avisos')"><span class="ti">📢</span>Avisos</div>
+        <div class="ph-tab" onclick="phTab('servicios')"><span class="ti">🔗</span>Servicios</div>
+        <div class="ph-tab" onclick="phTab('encuesta')"><span class="ti">📋</span>Encuesta</div>
+      </div>
+      <div class="ph-body">
+        <div class="ph-sec on" id="ph-login">
+          <div id="ph-login-form">
+            <div style="text-align:center;margin-bottom:12px;font-size:10px;color:#607D8B;">Introduce tus credenciales institucionales</div>
+            <div class="pf-field"><label>Usuario</label><input type="text" id="pu" placeholder="usuario.apellido"></div>
+            <div class="pf-field"><label>Contraseña</label><input type="password" id="pp" placeholder="••••••••"></div>
+            <button class="btn-pf-login" onclick="phLogin()">Acceder a Internet</button>
+            <div style="text-align:center;font-size:8px;color:#bbb;margin-top:10px;">🔒 Autenticado por AGA_AUTH · auth.uho.edu.cu</div>
+          </div>
+          <div id="ph-logged" style="display:none;text-align:center;padding:8px 0;">
+            <div class="ph-avatar">JL</div>
+            <div style="font-size:12px;font-weight:700;color:#003366;">José Luis Rodríguez Peña</div>
+            <div style="font-size:9px;color:#607D8B;margin-bottom:8px;">🎓 Estudiante · Informática</div>
+            <div style="background:#E8F5E9;border-radius:7px;padding:7px;font-size:9px;color:#1B873B;margin:8px 0;font-weight:600;">✅ Acceso a Internet concedido</div>
+            <button class="btn-logout" onclick="phLogout()">Cerrar sesión</button>
+          </div>
+        </div>
+        <div class="ph-sec" id="ph-noticias">
+          <div class="ph-card"><span class="ph-tag t-news">Noticias</span><div class="ph-card-title">Inicio de matrícula semestre 2024-2025</div><div class="ph-card-body">Del 15 al 20 de septiembre en los decanatos de cada facultad.</div><div class="ph-card-meta">📍 Rectorado · 🕐 14 sep 2025</div></div>
+          <div class="ph-card"><span class="ph-tag t-news">Noticias</span><div class="ph-card-title">Nuevo servicio de biblioteca digital</div><div class="ph-card-body">Accede a más de 10,000 recursos académicos desde la intranet universitaria.</div><div class="ph-card-meta">📍 Biblioteca · 🕐 10 sep 2025</div><a href="#" class="ph-card-link">Ver más →</a></div>
+          <div class="ph-card"><span class="ph-tag t-news">Noticias</span><div class="ph-card-title">Convocatoria a Jornada Científica Estudiantil</div><div class="ph-card-body">Entrega de resúmenes hasta el 1 de octubre.</div><div class="ph-card-meta">📍 VRICE · 🕐 5 sep 2025</div></div>
+        </div>
+        <div class="ph-sec" id="ph-eventos">
+          <div class="ph-card"><span class="ph-tag t-ev">Evento</span><div class="ph-card-title">Taller de Emprendimiento Tecnológico</div><div class="ph-card-body">Aprende a transformar ideas en proyectos viables.</div><div class="ph-card-meta">📅 20 Sep 2025 · 📍 CITI UHO · 📞 52123456</div><a href="#" class="ph-card-link">Convocatoria →</a></div>
+          <div class="ph-card"><span class="ph-tag t-ev">Evento</span><div class="ph-card-title">Conferencia: Seguridad Informática</div><div class="ph-card-body">Expertos abordarán los retos de la ciberseguridad institucional.</div><div class="ph-card-meta">📅 25 Sep 2025 · 📍 Aula Magna</div></div>
+        </div>
+        <div class="ph-sec" id="ph-avisos">
+          <div class="ph-card"><span class="ph-tag t-av">Aviso</span><div class="ph-card-title">Mantenimiento programado de la red</div><div class="ph-card-body">El sábado 21 de septiembre de 8:00 a 12:00, la red WiFi estará fuera de servicio.</div></div>
+          <div class="ph-card"><span class="ph-tag t-av">Aviso</span><div class="ph-card-title">Actualización del correo institucional</div><div class="ph-card-body">Actualiza tu contraseña del correo @uho.edu.cu antes del 30 de septiembre.</div></div>
+        </div>
+        <div class="ph-sec" id="ph-servicios">
+          <div class="ph-card"><span class="ph-tag t-sv">Servicio</span><div class="ph-card-title">📚 Biblioteca Digital UHO</div><div class="ph-card-body">Acceso a recursos académicos y científicos.</div><a href="#" class="ph-card-link">Acceder →</a></div>
+          <div class="ph-card"><span class="ph-tag t-sv">Servicio</span><div class="ph-card-title">📧 Correo Institucional</div><div class="ph-card-body">Webmail del correo @uho.edu.cu.</div><a href="#" class="ph-card-link">Acceder →</a></div>
+          <div class="ph-card"><span class="ph-tag t-sv">Servicio</span><div class="ph-card-title">🎓 SIGENU Estudiantes</div><div class="ph-card-body">Consulta tu expediente académico.</div><a href="#" class="ph-card-link">Acceder →</a></div>
+        </div>
+        <div class="ph-sec" id="ph-encuesta">
+          <div class="ph-card"><span class="ph-tag t-enc">Encuesta activa</span><div class="sq">¿Cómo calificarías la conexión WiFi?</div>
+            <div class="so"><input type="radio" name="e1" id="e1"><label for="e1">⭐⭐⭐⭐⭐ Excelente</label></div>
+            <div class="so"><input type="radio" name="e1" id="e2"><label for="e2">⭐⭐⭐⭐ Buena</label></div>
+            <div class="so"><input type="radio" name="e1" id="e3"><label for="e3">⭐⭐⭐ Regular</label></div>
+            <div class="so"><input type="radio" name="e1" id="e4"><label for="e4">⭐⭐ Mala</label></div>
+            <button class="btn-survey" onclick="encVotar()">Enviar respuesta</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div style="text-align:center;margin:10px 0 20px;color:rgba(255,255,255,.4);font-size:11px;">Vista móvil del Portal Cautivo (370px) · PortalInfo UHO</div>
+  </div>
+</div>
+
+<!-- ══════════════════ VIEW: LOGIN ADMIN ══════════════════ -->
+<div id="view-login">
+  <div class="lcard">
+    <div class="lcard-logo">
+      <div class="lcard-logobox">Portal<span>Info</span></div><br>
+      <span class="lcard-sub">Sistema de Gestión del Portal Cautivo UHO</span>
+    </div>
+    <h2>Panel de Administración</h2>
+    <div class="lcard-hint">Acceso exclusivo para usuarios registrados</div>
+    <div class="aga-note">🔐 Autenticación via <strong>AGA_AUTH</strong> · auth.uho.edu.cu<br>Use sus credenciales institucionales UHO.</div>
+    <div class="fg"><label class="fl">Usuario (@uho.edu.cu)</label><input class="fc" type="text" placeholder="usuario.apellido"></div>
+    <div class="fg"><label class="fl">Contraseña</label><input class="fc" type="password" placeholder="••••••••"></div>
+    <button class="btn btn-p" style="width:100%;padding:11px;font-size:13px;" onclick="toggleDenied()">Iniciar sesión</button>
+    <div id="denied-msg" class="access-denied" style="display:none;">⛔ No tiene acceso a este sistema. Contacte al administrador.</div>
+    <div style="text-align:center;margin-top:14px;font-size:10px;color:#aaa;">Solo usuarios previamente registrados por un Administrador.</div>
+  </div>
+</div>
+
+<!-- ══════════════════ VIEW: ADMIN ══════════════════ -->
+<div id="view-admin">
+  <!-- SIDEBAR -->
+  <div id="admin-sidebar">
+    <div class="sb-brand">Portal<span>Info</span> UHO</div>
+    <div class="sb-lbl">Principal</div>
+    <div class="sb-item" data-panel="dashboard"><span class="ico">📊</span><span>Dashboard</span></div>
+    <div class="sb-lbl">Contenidos</div>
+    <div class="sb-item" data-panel="noticias"><span class="ico">📰</span><span>Noticias</span></div>
+    <div class="sb-item" data-panel="eventos"><span class="ico">📅</span><span>Eventos</span></div>
+    <div class="sb-item" data-panel="avisos"><span class="ico">📢</span><span>Avisos</span></div>
+    <div class="sb-item" data-panel="servicios"><span class="ico">🔗</span><span>Servicios RedUHO</span></div>
+    <div class="sb-item" data-panel="encuestas"><span class="ico">📋</span><span>Encuestas</span></div>
+    <div class="sb-lbl">Gestión</div>
+    <div class="sb-item" data-panel="aprobacion"><span class="ico">✅</span><span>Aprobación</span><span class="sb-badge">3</span></div>
+    <div class="sb-item" data-panel="estadisticas"><span class="ico">📈</span><span>Estadísticas</span></div>
+    <div class="sb-item" data-panel="usuarios"><span class="ico">👥</span><span>Usuarios</span></div>
+    <div class="sb-lbl">Sistema</div>
+    <div class="sb-item" data-panel="configuracion"><span class="ico">⚙️</span><span>Configuración</span></div>
+    <div class="sb-item" data-panel="nomencladores"><span class="ico">🗂️</span><span>Nomencladores</span></div>
+  </div>
+
+  <!-- CONTENT AREA -->
+  <div id="admin-content">
+
+    <!-- ── DASHBOARD ── -->
+    <div class="panel" id="panel-dashboard">
+      <div class="atop"><h1>Dashboard</h1><div class="acts"><div class="notif-bell" onclick="openModal('m-notifs')">🔔<span class="notif-n">3</span></div><div class="uav">MA</div><span style="font-size:12px;font-weight:600;">María Álvarez</span><span class="badge bb" style="font-size:9px;">Admin</span></div></div>
+      <div class="alert a-info">📡 Portal Cautivo activo · Última sincronización: hace 2 min · <strong>portalapi.uho.edu.cu</strong></div>
+      <div class="kgrid">
+        <div class="kcard"><div class="kl">Accesos hoy</div><div class="kv" style="color:#1565C0;">847</div><div class="ks">+12% vs ayer</div></div>
+        <div class="kcard"><div class="kl">Contenidos activos</div><div class="kv" style="color:#1B873B;">23</div><div class="ks">5 pendientes aprobación</div></div>
+        <div class="kcard"><div class="kl">Pendientes aprobación</div><div class="kv" style="color:#FF6F00;">3</div><div class="ks">Requieren revisión</div></div>
+        <div class="kcard"><div class="kl">Encuestas completadas</div><div class="kv" style="color:#6A1B9A;">312</div><div class="ks">Esta semana</div></div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+        <div class="pcard"><div class="pcard-head"><h3>Accesos últimos 7 días</h3></div><div class="pcard-body">
+          <div class="cbars">
+            <div class="cbar" style="height:60%" title="Lun:620"></div><div class="cbar" style="height:75%" title="Mar:780"></div>
+            <div class="cbar" style="height:55%" title="Mié:570"></div><div class="cbar" style="height:90%" title="Jue:920"></div>
+            <div class="cbar" style="height:70%" title="Vie:730"></div><div class="cbar" style="height:40%" title="Sáb:410"></div>
+            <div class="cbar" style="height:100%;background:linear-gradient(180deg,#FF6F00,#E65100)" title="Hoy:847"></div>
+          </div>
+          <div class="clbls"><div class="clbl">Lun</div><div class="clbl">Mar</div><div class="clbl">Mié</div><div class="clbl">Jue</div><div class="clbl">Vie</div><div class="clbl">Sáb</div><div class="clbl">Hoy</div></div>
+        </div></div>
+        <div class="pcard"><div class="pcard-head"><h3>Tipo de usuarios</h3></div><div class="pcard-body">
+          <div class="pie-wrap"><div class="pie"></div><div class="leg">
+            <div class="leg-i"><div class="leg-d" style="background:#1565C0"></div>Estudiantes (55%)</div>
+            <div class="leg-i"><div class="leg-d" style="background:#FF6F00"></div>Trabajadores (25%)</div>
+            <div class="leg-i"><div class="leg-d" style="background:#1B873B"></div>Institucional (20%)</div>
+          </div></div>
+        </div></div>
+      </div>
+      <div class="pcard" style="margin-top:16px;"><div class="pcard-head"><h3>Contenidos más vistos hoy</h3><button class="btn btn-o btn-sm" onclick="goPanel('estadisticas')">Ver estadísticas</button></div>
+        <div class="pcard-body" style="padding:0;"><table class="dtbl"><thead><tr><th>Categoría</th><th>Título</th><th>Vistas</th><th>Estado</th></tr></thead><tbody>
+          <tr><td><span class="badge bb">Noticia</span></td><td>Inicio de matrícula semestre 2024-2025</td><td>234</td><td><span class="badge bg">✅ Activo</span></td></tr>
+          <tr><td><span class="badge bg" style="background:#E8F5E9;color:#1B873B;">Evento</span></td><td>Taller Emprendimiento Tecnológico</td><td>189</td><td><span class="badge bg">✅ Activo</span></td></tr>
+          <tr><td><span class="badge" style="background:#FCE4EC;color:#AD1457;">Encuesta</span></td><td>¿Cómo calificarías la conexión WiFi?</td><td>156</td><td><span class="badge bg">✅ Activo</span></td></tr>
+          <tr><td><span class="badge bo">Aviso</span></td><td>Mantenimiento programado de la red</td><td>98</td><td><span class="badge bg">✅ Activo</span></td></tr>
+        </tbody></table></div>
+      </div>
+    </div>
+
+    <!-- ── NOTICIAS ── -->
+    <div class="panel" id="panel-noticias">
+      <div class="atop"><h1>📰 Gestión de Noticias</h1><div class="acts"><button class="btn btn-a" onclick="openModal('m-noticia')">+ Nueva noticia</button></div></div>
+      <div class="alert a-info">Máximo visible en portal: <strong>5</strong> · Límite título: <strong>100 chars</strong> · Límite contenido: <strong>300 chars</strong></div>
+      <div class="pcard"><div class="pcard-head"><h3>Noticias (8 total · 5 activas)</h3>
+        <div style="display:flex;gap:7px;"><select class="fc" style="width:auto;font-size:11px;padding:4px 9px;"><option>Todos los estados</option><option>Activas</option><option>Pendientes</option><option>Expiradas</option></select>
+        <input class="fc" style="width:160px;font-size:11px;padding:4px 9px;" placeholder="🔍 Buscar..."></div>
+      </div>
+      <div style="padding:0;"><table class="dtbl"><thead><tr><th>Visible</th><th>Título</th><th>Área</th><th>Vigencia</th><th>Estado</th><th>Vistas</th><th>Acciones</th></tr></thead><tbody>
+        <tr><td><label class="sw"><input type="checkbox" checked><span class="sl"></span></label></td><td style="font-weight:600;">Inicio de matrícula semestre 2024-2025</td><td>Rectorado</td><td>Esta semana</td><td><span class="badge bg">✅ Aprobada</span></td><td>234</td><td><div class="cra"><button class="btn btn-o btn-sm">✏️</button><button class="btn btn-d btn-sm">🗑️</button></div></td></tr>
+        <tr><td><label class="sw"><input type="checkbox" checked><span class="sl"></span></label></td><td style="font-weight:600;">Nuevo servicio de biblioteca digital</td><td>Biblioteca</td><td>Este mes</td><td><span class="badge bg">✅ Aprobada</span></td><td>189</td><td><div class="cra"><button class="btn btn-o btn-sm">✏️</button><button class="btn btn-d btn-sm">🗑️</button></div></td></tr>
+        <tr><td><label class="sw"><input type="checkbox"><span class="sl"></span></label></td><td style="font-weight:600;">Convocatoria Jornada Científica</td><td>VRICE</td><td>15-30 sep</td><td><span class="badge bo">⏳ Pendiente</span></td><td>0</td><td><div class="cra"><button class="btn btn-o btn-sm">✏️</button><button class="btn btn-d btn-sm">🗑️</button></div></td></tr>
+        <tr><td><label class="sw"><input type="checkbox" checked><span class="sl"></span></label></td><td style="font-weight:600;">Actualización del sistema SIGENU</td><td>DTI</td><td>3 días</td><td><span class="badge bg">✅ Aprobada</span></td><td>76</td><td><div class="cra"><button class="btn btn-o btn-sm">✏️</button><button class="btn btn-d btn-sm">🗑️</button></div></td></tr>
+        <tr style="opacity:.5;"><td><label class="sw"><input type="checkbox"><span class="sl"></span></label></td><td>Premio anual a la investigación 2024</td><td>VRICE</td><td>Expirada</td><td><span class="badge bgr">⏱️ Expirada</span></td><td>412</td><td><div class="cra"><button class="btn btn-o btn-sm">✏️</button><button class="btn btn-d btn-sm">🗑️</button></div></td></tr>
+      </tbody></table></div></div>
+    </div>
+
+    <!-- ── EVENTOS ── -->
+    <div class="panel" id="panel-eventos">
+      <div class="atop"><h1>📅 Gestión de Eventos</h1><div class="acts"><button class="btn btn-a" onclick="openModal('m-evento')">+ Nuevo evento</button></div></div>
+      <div class="pcard"><div class="pcard-head"><h3>Eventos (5 total · 3 activos)</h3></div>
+        <div style="padding:0;"><table class="dtbl"><thead><tr><th>Visible</th><th>Nombre del Evento</th><th>Área</th><th>Fecha</th><th>Estado</th><th>Acciones</th></tr></thead><tbody>
+          <tr><td><label class="sw"><input type="checkbox" checked><span class="sl"></span></label></td><td style="font-weight:600;">Taller Emprendimiento Tecnológico</td><td>CITI UHO</td><td>20 Sep 2025</td><td><span class="badge bg">✅ Aprobado</span></td><td><div class="cra"><button class="btn btn-o btn-sm">✏️</button><button class="btn btn-d btn-sm">🗑️</button></div></td></tr>
+          <tr><td><label class="sw"><input type="checkbox" checked><span class="sl"></span></label></td><td style="font-weight:600;">Conferencia: Seguridad Informática</td><td>FIC</td><td>25 Sep 2025</td><td><span class="badge bg">✅ Aprobado</span></td><td><div class="cra"><button class="btn btn-o btn-sm">✏️</button><button class="btn btn-d btn-sm">🗑️</button></div></td></tr>
+          <tr><td><label class="sw"><input type="checkbox"><span class="sl"></span></label></td><td style="font-weight:600;">Festival Cultural Universitario</td><td>Extensión</td><td>5 Oct 2025</td><td><span class="badge bo">⏳ Pendiente</span></td><td><div class="cra"><button class="btn btn-o btn-sm">✏️</button><button class="btn btn-d btn-sm">🗑️</button></div></td></tr>
+        </tbody></table></div>
+      </div>
+    </div>
+
+    <!-- ── AVISOS ── -->
+    <div class="panel" id="panel-avisos">
+      <div class="atop"><h1>📢 Gestión de Avisos</h1><div class="acts"><button class="btn btn-a">+ Nuevo aviso</button></div></div>
+      <div class="pcard"><div class="pcard-head"><h3>Avisos (4 total · 2 activos)</h3></div>
+        <div style="padding:0;"><table class="dtbl"><thead><tr><th>Visible</th><th>Título</th><th>Vigencia</th><th>Estado</th><th>Acciones</th></tr></thead><tbody>
+          <tr><td><label class="sw"><input type="checkbox" checked><span class="sl"></span></label></td><td style="font-weight:600;">Mantenimiento programado de la red</td><td>21 sep</td><td><span class="badge bg">✅ Aprobado</span></td><td><div class="cra"><button class="btn btn-o btn-sm">✏️</button><button class="btn btn-d btn-sm">🗑️</button></div></td></tr>
+          <tr><td><label class="sw"><input type="checkbox" checked><span class="sl"></span></label></td><td style="font-weight:600;">Actualización del correo institucional</td><td>Este mes</td><td><span class="badge bg">✅ Aprobado</span></td><td><div class="cra"><button class="btn btn-o btn-sm">✏️</button><button class="btn btn-d btn-sm">🗑️</button></div></td></tr>
+        </tbody></table></div>
+      </div>
+    </div>
+
+    <!-- ── SERVICIOS ── -->
+    <div class="panel" id="panel-servicios">
+      <div class="atop"><h1>🔗 Gestión de Servicios RedUHO</h1><div class="acts"><button class="btn btn-a">+ Nuevo servicio</button></div></div>
+      <div class="pcard"><div class="pcard-head"><h3>Servicios (6 total · 4 activos)</h3></div>
+        <div style="padding:0;"><table class="dtbl"><thead><tr><th>Visible</th><th>Nombre</th><th>Descripción</th><th>Link</th><th>Estado</th><th>Acciones</th></tr></thead><tbody>
+          <tr><td><label class="sw"><input type="checkbox" checked><span class="sl"></span></label></td><td style="font-weight:600;">📚 Biblioteca Digital</td><td>Recursos académicos en línea</td><td><a href="#" style="font-size:10px;color:#1565C0;">biblioteca.uho.edu.cu</a></td><td><span class="badge bg">✅ Activo</span></td><td><div class="cra"><button class="btn btn-o btn-sm">✏️</button><button class="btn btn-d btn-sm">🗑️</button></div></td></tr>
+          <tr><td><label class="sw"><input type="checkbox" checked><span class="sl"></span></label></td><td style="font-weight:600;">📧 Correo Institucional</td><td>Webmail @uho.edu.cu</td><td><a href="#" style="font-size:10px;color:#1565C0;">mail.uho.edu.cu</a></td><td><span class="badge bg">✅ Activo</span></td><td><div class="cra"><button class="btn btn-o btn-sm">✏️</button><button class="btn btn-d btn-sm">🗑️</button></div></td></tr>
+          <tr><td><label class="sw"><input type="checkbox" checked><span class="sl"></span></label></td><td style="font-weight:600;">🎓 SIGENU Estudiantes</td><td>Gestión académica estudiantil</td><td><a href="#" style="font-size:10px;color:#1565C0;">sigenu.uho.edu.cu</a></td><td><span class="badge bg">✅ Activo</span></td><td><div class="cra"><button class="btn btn-o btn-sm">✏️</button><button class="btn btn-d btn-sm">🗑️</button></div></td></tr>
+        </tbody></table></div>
+      </div>
+    </div>
+
+    <!-- ── ENCUESTAS ── -->
+    <div class="panel" id="panel-encuestas">
+      <div class="atop"><h1>📋 Gestión de Encuestas</h1><div class="acts"><button class="btn btn-a" onclick="openModal('m-encuesta')">+ Nueva encuesta</button></div></div>
+      <div class="itabs">
+        <div class="itab on" onclick="iTab(this,'ip-enc-lista')">Listado</div>
+        <div class="itab" onclick="iTab(this,'ip-enc-res')">Resultados</div>
+      </div>
+      <div class="ipanel on" id="ip-enc-lista">
+        <div class="pcard"><div class="pcard-head"><h3>Encuestas (3 total · 1 activa)</h3></div>
+          <div style="padding:0;"><table class="dtbl"><thead><tr><th>Visible</th><th>Título</th><th>Tipo</th><th>Preguntas</th><th>Respuestas</th><th>Estado</th><th>Acciones</th></tr></thead><tbody>
+            <tr><td><label class="sw"><input type="checkbox" checked><span class="sl"></span></label></td><td style="font-weight:600;">Calidad de la conexión WiFi</td><td>Interna</td><td>1</td><td>312</td><td><span class="badge bg">✅ Aprobada</span></td><td><div class="cra"><button class="btn btn-o btn-sm" onclick="iTab(document.querySelector('#panel-encuestas .itab:nth-child(2)'),'ip-enc-res')">📊</button><button class="btn btn-o btn-sm">✏️</button></div></td></tr>
+            <tr><td><label class="sw"><input type="checkbox"><span class="sl"></span></label></td><td style="font-weight:600;">Satisfacción con servicios universitarios</td><td>Link externo</td><td>-</td><td>-</td><td><span class="badge bo">⏳ Pendiente</span></td><td><div class="cra"><button class="btn btn-o btn-sm">✏️</button><button class="btn btn-d btn-sm">🗑️</button></div></td></tr>
+          </tbody></table></div>
+        </div>
+      </div>
+      <div class="ipanel" id="ip-enc-res">
+        <div class="pcard"><div class="pcard-head"><h3>📊 Resultados: "Calidad conexión WiFi" (312 respuestas)</h3></div><div class="pcard-body">
+          <div class="bar-wrap"><div class="bar-lbl"><span>⭐⭐⭐⭐⭐ Excelente</span><span>42%</span></div><div class="bar-bg"><div class="bar-fill" style="width:42%"></div></div></div>
+          <div class="bar-wrap"><div class="bar-lbl"><span>⭐⭐⭐⭐ Buena</span><span>28%</span></div><div class="bar-bg"><div class="bar-fill" style="width:28%;background:linear-gradient(90deg,#1B873B,#0D5C2E)"></div></div></div>
+          <div class="bar-wrap"><div class="bar-lbl"><span>⭐⭐⭐ Regular</span><span>18%</span></div><div class="bar-bg"><div class="bar-fill" style="width:18%;background:linear-gradient(90deg,#FF6F00,#E65100)"></div></div></div>
+          <div class="bar-wrap"><div class="bar-lbl"><span>⭐⭐ Mala</span><span>8%</span></div><div class="bar-bg"><div class="bar-fill" style="width:8%;background:linear-gradient(90deg,#C62828,#8D1A1A)"></div></div></div>
+          <div class="bar-wrap"><div class="bar-lbl"><span>⭐ Muy mala</span><span>4%</span></div><div class="bar-bg"><div class="bar-fill" style="width:4%;background:linear-gradient(90deg,#AD1457,#7B1041)"></div></div></div>
+          <div style="margin-top:14px;font-size:11px;color:#607D8B;">📅 Activa desde 1 sep 2025 · <button class="btn btn-o btn-sm">Exportar CSV</button></div>
+        </div></div>
+      </div>
+    </div>
+
+    <!-- ── APROBACIÓN ── -->
+    <div class="panel" id="panel-aprobacion">
+      <div class="atop"><h1>✅ Cola de Aprobación</h1><div class="acts"><span class="badge bo" style="font-size:12px;padding:5px 12px;">3 pendientes</span></div></div>
+      <div class="alert a-warn">⚠️ Tienes <strong>3 contenidos pendientes</strong> de aprobación.</div>
+      <div class="acard"><div class="acard-head"><div><span class="badge bb">📰 Noticia</span> <span style="font-size:10px;color:#aaa;margin-left:7px;">Por: Carlos Mendoza · hace 2h</span></div><span class="badge bo">⏳ Pendiente</span></div>
+        <div class="acard-title">Convocatoria Jornada Científica Estudiantil</div>
+        <div class="acard-body">Entrega de resúmenes hasta el 1 de octubre. Modalidades: presencial y virtual. Área: VRICE. Vigencia: 15-30 sep 2025.</div>
+        <div class="acard-acts"><button class="btn btn-s btn-sm" onclick="aprobar(this)">✅ Aprobar</button><button class="btn btn-d btn-sm" onclick="rechazar(this)">❌ Rechazar</button><button class="btn btn-o btn-sm">👁️ Ver completo</button></div>
+      </div>
+      <div class="acard"><div class="acard-head"><div><span class="badge bg" style="background:#E8F5E9;color:#1B873B;">📅 Evento</span> <span style="font-size:10px;color:#aaa;margin-left:7px;">Por: Ana García · hace 5h</span></div><span class="badge bo">⏳ Pendiente</span></div>
+        <div class="acard-title">Festival Cultural Universitario</div>
+        <div class="acard-body">Gran celebración anual. Área: Extensión Universitaria. Fecha: 5 Oct 2025. Vigencia: Este mes.</div>
+        <div class="acard-acts"><button class="btn btn-s btn-sm" onclick="aprobar(this)">✅ Aprobar</button><button class="btn btn-d btn-sm" onclick="rechazar(this)">❌ Rechazar</button><button class="btn btn-o btn-sm">👁️ Ver completo</button></div>
+      </div>
+      <div class="acard"><div class="acard-head"><div><span class="badge bo">📢 Aviso</span> <span style="font-size:10px;color:#aaa;margin-left:7px;">Por: DTI UHO · hace 1 día</span></div><span class="badge bo">⏳ Pendiente</span></div>
+        <div class="acard-title">Cambios en política de contraseñas WiFi</div>
+        <div class="acard-body">A partir del 1 de octubre, contraseñas con mínimo 8 caracteres + mayúsculas + especiales.</div>
+        <div class="acard-acts"><button class="btn btn-s btn-sm" onclick="aprobar(this)">✅ Aprobar</button><button class="btn btn-d btn-sm" onclick="rechazar(this)">❌ Rechazar</button><button class="btn btn-o btn-sm">👁️ Ver completo</button></div>
+      </div>
+    </div>
+
+    <!-- ── ESTADÍSTICAS ── -->
+    <div class="panel" id="panel-estadisticas">
+      <div class="atop"><h1>📈 Estadísticas del Portal Cautivo</h1><div class="acts"><button class="btn btn-o btn-sm">Exportar CSV</button><button class="btn btn-o btn-sm">Exportar PDF</button></div></div>
+      <div class="itabs">
+        <div class="itab on" onclick="iTab(this,'ip-est-uso')">Uso General</div>
+        <div class="itab" onclick="iTab(this,'ip-est-seg')">Ciberseguridad</div>
+        <div class="itab" onclick="iTab(this,'ip-est-log')">Logs de Acceso</div>
+      </div>
+      <div class="ipanel on" id="ip-est-uso">
+        <div class="kgrid">
+          <div class="kcard"><div class="kl">Accesos este mes</div><div class="kv">12,847</div><div class="ks">+8% vs mes anterior</div></div>
+          <div class="kcard"><div class="kl">Usuarios únicos</div><div class="kv">2,341</div><div class="ks">Estudiantes + Trabajadores</div></div>
+          <div class="kcard"><div class="kl">Hora pico</div><div class="kv">8-9 AM</div><div class="ks">Mayor actividad</div></div>
+          <div class="kcard"><div class="kl">Dispositivos móviles</div><div class="kv">78%</div><div class="ks">vs 22% PC/laptop</div></div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+          <div class="pcard"><div class="pcard-head"><h3>Accesos por tipo de usuario</h3></div><div class="pcard-body"><div class="pie-wrap"><div class="pie"></div><div class="leg"><div class="leg-i"><div class="leg-d" style="background:#1565C0"></div>Estudiantes 55%</div><div class="leg-i"><div class="leg-d" style="background:#FF6F00"></div>Trabajadores 25%</div><div class="leg-i"><div class="leg-d" style="background:#1B873B"></div>Institucional 20%</div></div></div></div></div>
+          <div class="pcard"><div class="pcard-head"><h3>Contenidos más vistos</h3></div><div class="pcard-body">
+            <div class="bar-wrap"><div class="bar-lbl"><span>Inicio de matrícula</span><span>1,234</span></div><div class="bar-bg"><div class="bar-fill" style="width:85%"></div></div></div>
+            <div class="bar-wrap"><div class="bar-lbl"><span>Biblioteca Digital</span><span>987</span></div><div class="bar-bg"><div class="bar-fill" style="width:67%;background:linear-gradient(90deg,#1B873B,#0D5C2E)"></div></div></div>
+            <div class="bar-wrap"><div class="bar-lbl"><span>Encuesta WiFi</span><span>756</span></div><div class="bar-bg"><div class="bar-fill" style="width:51%;background:linear-gradient(90deg,#FF6F00,#E65100)"></div></div></div>
+          </div></div>
+        </div>
+      </div>
+      <div class="ipanel" id="ip-est-seg">
+        <div class="alert a-warn">⚠️ <strong>2 alertas de ciberseguridad</strong> detectadas en los últimos 7 días</div>
+        <div class="pcard"><div class="pcard-head"><h3>🔐 Alertas de Uso Compartido de Cuentas</h3></div>
+          <div style="padding:0;"><table class="dtbl"><thead><tr><th>Usuario</th><th>IPs distintas</th><th>Dispositivos</th><th>Período</th><th>Riesgo</th></tr></thead><tbody>
+            <tr><td style="font-weight:600;">juan.perez</td><td>4 IPs</td><td>3 dispositivos</td><td>Últimas 2h</td><td><span class="badge br">🔴 Alto</span></td></tr>
+            <tr><td style="font-weight:600;">maria.rodriguez</td><td>2 IPs</td><td>2 dispositivos</td><td>Hoy</td><td><span class="badge bo">🟠 Medio</span></td></tr>
+          </tbody></table></div>
+        </div>
+      </div>
+      <div class="ipanel" id="ip-est-log">
+        <div class="pcard"><div class="pcard-head"><h3>📋 Log de Accesos Recientes</h3><input class="fc" style="width:180px;font-size:11px;padding:4px 9px;" placeholder="🔍 Filtrar..."></div>
+          <div style="padding:0;"><table class="dtbl"><thead><tr><th>Fecha/Hora</th><th>Usuario</th><th>Tipo</th><th>IP</th><th>Dispositivo</th><th>Sección</th></tr></thead><tbody>
+            <tr><td style="font-size:10px;">14:32:01</td><td>juan.perez</td><td><span class="badge bb">Estudiante</span></td><td>10.0.1.45</td><td>📱 Android</td><td>Noticias</td></tr>
+            <tr><td style="font-size:10px;">14:31:22</td><td>ana.garcia</td><td><span class="badge bg">Trabajadora</span></td><td>10.0.2.12</td><td>💻 Windows</td><td>Login</td></tr>
+            <tr><td style="font-size:10px;">14:30:55</td><td>carlos.m</td><td><span class="badge bb">Estudiante</span></td><td>10.0.1.78</td><td>📱 iOS</td><td>Encuesta</td></tr>
+            <tr><td style="font-size:10px;">14:29:44</td><td>luis.hdz</td><td><span class="badge bb">Estudiante</span></td><td>10.0.3.22</td><td>📱 Android</td><td>Servicios</td></tr>
+          </tbody></table></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── USUARIOS ── -->
+    <div class="panel" id="panel-usuarios">
+      <div class="atop"><h1>👥 Gestión de Usuarios</h1><div class="acts"><button class="btn btn-a" onclick="openModal('m-usuario')">+ Nuevo usuario</button></div></div>
+      <div class="alert a-info">Solo los usuarios registrados aquí pueden acceder al panel, aunque tengan credenciales UHO válidas.</div>
+      <div class="pcard"><div class="pcard-head"><h3>Usuarios del sistema (5)</h3><input class="fc" style="width:180px;font-size:11px;padding:4px 9px;" placeholder="🔍 Buscar..."></div>
+        <div style="padding:0;"><table class="dtbl"><thead><tr><th>Estado</th><th>Nombre</th><th>Correo UHO</th><th>Rol</th><th>Categorías</th><th>Último acceso</th><th>Acciones</th></tr></thead><tbody>
+          <tr><td><span class="tag-on"></span>Activo</td><td style="font-weight:600;">Roberto Sánchez Moya</td><td>roberto.sanchez@uho.edu.cu</td><td><span class="badge" style="background:#E8EAF6;color:#3949AB;">Superadmin</span></td><td>Todas</td><td>Hoy 14:20</td><td><div class="cra"><button class="btn btn-o btn-sm">✏️</button></div></td></tr>
+          <tr><td><span class="tag-on"></span>Activo</td><td style="font-weight:600;">María Álvarez Fuentes</td><td>maria.alvarez@uho.edu.cu</td><td><span class="badge bb">Admin</span></td><td>Todas</td><td>Hoy 13:45</td><td><div class="cra"><button class="btn btn-o btn-sm">✏️</button><button class="btn btn-d btn-sm">🗑️</button></div></td></tr>
+          <tr><td><span class="tag-on"></span>Activo</td><td style="font-weight:600;">Carlos Mendoza Lima</td><td>carlos.mendoza@uho.edu.cu</td><td><span class="badge bg">Gestor</span></td><td>Noticias, Eventos</td><td>Hoy 11:30</td><td><div class="cra"><button class="btn btn-o btn-sm">✏️</button><button class="btn btn-d btn-sm">🗑️</button></div></td></tr>
+          <tr><td><span class="tag-on"></span>Activo</td><td style="font-weight:600;">Ana García Rodríguez</td><td>ana.garcia@uho.edu.cu</td><td><span class="badge bg">Gestor</span></td><td>Eventos, Avisos</td><td>Ayer 16:20</td><td><div class="cra"><button class="btn btn-o btn-sm">✏️</button><button class="btn btn-d btn-sm">🗑️</button></div></td></tr>
+          <tr><td><span class="tag-off"></span><span style="opacity:.6;">Inactivo</span></td><td style="font-weight:600;opacity:.6;">Luis Herrera Díaz</td><td style="opacity:.6;">luis.herrera@uho.edu.cu</td><td><span class="badge bg" style="opacity:.6;">Gestor</span></td><td>Servicios</td><td>Hace 30 días</td><td><div class="cra"><button class="btn btn-o btn-sm">✏️</button><button class="btn btn-d btn-sm">🗑️</button></div></td></tr>
+        </tbody></table></div>
+      </div>
+    </div>
+
+    <!-- ── CONFIGURACIÓN ── -->
+    <div class="panel" id="panel-configuracion">
+      <div class="atop"><h1>⚙️ Configuración Global</h1><div class="acts"><button class="btn btn-p">💾 Guardar cambios</button></div></div>
+      <div class="itabs">
+        <div class="itab on" onclick="iTab(this,'ip-cfg-portal')">Portal Cautivo</div>
+        <div class="itab" onclick="iTab(this,'ip-cfg-limites')">Límites</div>
+        <div class="itab" onclick="iTab(this,'ip-cfg-enc')">Encuestas</div>
+        <div class="itab" onclick="iTab(this,'ip-cfg-sys')">Sistema</div>
+      </div>
+      <div class="ipanel on" id="ip-cfg-portal">
+        <div class="pcard"><div class="pcard-head"><h3>Secciones del Portal Cautivo</h3></div><div class="pcard-body">
+          <p style="font-size:11px;color:#607D8B;margin-bottom:14px;">Activa o desactiva secciones. El portal se adapta automáticamente sin modificar el HTML en pfSense.</p>
+          <div class="cfg-row"><div><div class="cfg-key">📰 Noticias</div><div class="cfg-desc">Mostrar noticias institucionales</div></div><label class="sw"><input type="checkbox" checked><span class="sl"></span></label></div>
+          <div class="cfg-row"><div><div class="cfg-key">📅 Eventos</div><div class="cfg-desc">Mostrar eventos universitarios</div></div><label class="sw"><input type="checkbox" checked><span class="sl"></span></label></div>
+          <div class="cfg-row"><div><div class="cfg-key">📢 Avisos</div><div class="cfg-desc">Mostrar avisos importantes</div></div><label class="sw"><input type="checkbox" checked><span class="sl"></span></label></div>
+          <div class="cfg-row"><div><div class="cfg-key">🔗 Servicios RedUHO</div><div class="cfg-desc">Mostrar listado de servicios</div></div><label class="sw"><input type="checkbox" checked><span class="sl"></span></label></div>
+          <div class="cfg-row"><div><div class="cfg-key">📋 Encuestas</div><div class="cfg-desc">Mostrar encuestas activas</div></div><label class="sw"><input type="checkbox" checked><span class="sl"></span></label></div>
+        </div></div>
+      </div>
+      <div class="ipanel" id="ip-cfg-limites">
+        <div class="pcard"><div class="pcard-head"><h3>Límites por Categoría</h3></div><div class="pcard-body">
+          <table class="dtbl"><thead><tr><th>Categoría</th><th>Máx. visibles</th><th>Máx. chars título</th><th>Máx. chars descripción</th></tr></thead><tbody>
+            <tr><td>📰 Noticias</td><td><input class="mi" type="number" value="5"></td><td><input class="mi" type="number" value="100"></td><td><input class="mi" type="number" value="300"></td></tr>
+            <tr><td>📅 Eventos</td><td><input class="mi" type="number" value="4"></td><td><input class="mi" type="number" value="120"></td><td><input class="mi" type="number" value="400"></td></tr>
+            <tr><td>📢 Avisos</td><td><input class="mi" type="number" value="3"></td><td><input class="mi" type="number" value="80"></td><td><input class="mi" type="number" value="250"></td></tr>
+            <tr><td>🔗 Servicios</td><td><input class="mi" type="number" value="8"></td><td><input class="mi" type="number" value="60"></td><td><input class="mi" type="number" value="150"></td></tr>
+            <tr><td>📋 Encuestas</td><td><input class="mi" type="number" value="1"></td><td><input class="mi" type="number" value="150"></td><td><input class="mi" type="number" value="200"></td></tr>
+          </tbody></table>
+        </div></div>
+      </div>
+      <div class="ipanel" id="ip-cfg-enc">
+        <div class="pcard"><div class="pcard-head"><h3>Configuración de Encuestas</h3></div><div class="pcard-body">
+          <div class="cfg-row"><div><div class="cfg-key">Máximo de preguntas por encuesta</div></div><input class="mi" type="number" value="10"></div>
+          <div class="cfg-row"><div><div class="cfg-key">Máximo de opciones por pregunta</div></div><input class="mi" type="number" value="6"></div>
+          <div class="cfg-row"><div><div class="cfg-key">Permitir preguntas abiertas</div></div><label class="sw"><input type="checkbox" checked><span class="sl"></span></label></div>
+          <div class="cfg-row"><div><div class="cfg-key">Requerir autenticación para votar</div></div><label class="sw"><input type="checkbox"><span class="sl"></span></label></div>
+        </div></div>
+      </div>
+      <div class="ipanel" id="ip-cfg-sys">
+        <div class="pcard"><div class="pcard-head"><h3>Configuración del Sistema</h3></div><div class="pcard-body">
+          <div class="fr">
+            <div class="fg"><label class="fl">URL del Portal Cautivo</label><input class="fc" value="https://portalapi.uho.edu.cu"></div>
+            <div class="fg"><label class="fl">URL de AGA_AUTH</label><input class="fc" value="https://auth.uho.edu.cu"></div>
+          </div>
+          <div class="cfg-row"><div><div class="cfg-key">Intentos máximos de login fallidos</div></div><input class="mi" type="number" value="5"></div>
+          <div class="cfg-row"><div><div class="cfg-key">Retención de logs (días)</div></div><input class="mi" type="number" value="90"></div>
+          <div class="cfg-row"><div><div class="cfg-key">Notificaciones por correo</div></div><label class="sw"><input type="checkbox" checked><span class="sl"></span></label></div>
+        </div></div>
+      </div>
+    </div>
+
+    <!-- ── NOMENCLADORES ── -->
+    <div class="panel" id="panel-nomencladores">
+      <div class="atop"><h1>🗂️ Nomencladores</h1></div>
+      <div class="itabs">
+        <div class="itab on" onclick="iTab(this,'ip-nom-areas')">Áreas</div>
+        <div class="itab" onclick="iTab(this,'ip-nom-cats')">Categorías</div>
+      </div>
+      <div class="ipanel on" id="ip-nom-areas">
+        <div class="pcard"><div class="pcard-head"><h3>Áreas/Departamentos</h3><button class="btn btn-a btn-sm">+ Agregar área</button></div><div class="pcard-body">
+          <div style="margin-bottom:12px;">
+            <span class="ntag">Rectorado <span class="x">×</span></span><span class="ntag">Biblioteca Central <span class="x">×</span></span><span class="ntag">VRICE <span class="x">×</span></span><span class="ntag">DTI <span class="x">×</span></span><span class="ntag">CITI UHO <span class="x">×</span></span><span class="ntag">FIC <span class="x">×</span></span><span class="ntag">Extensión Universitaria <span class="x">×</span></span><span class="ntag">Recursos Humanos <span class="x">×</span></span>
+          </div>
+          <div style="display:flex;gap:7px;margin-top:14px;">
+            <input class="fc" placeholder="Nombre del área..." style="max-width:280px;">
+            <button class="btn btn-p btn-sm">Agregar</button>
+          </div>
+        </div></div>
+      </div>
+      <div class="ipanel" id="ip-nom-cats">
+        <div class="pcard"><div class="pcard-head"><h3>Categorías Dinámicas (Superadmin)</h3><button class="btn btn-a btn-sm">+ Nueva categoría</button></div><div class="pcard-body">
+          <div class="alert a-info">Las categorías dinámicas se añaden automáticamente al portal y a la API sin modificar código.</div>
+          <table class="dtbl"><thead><tr><th>Nombre</th><th>Slug API</th><th>En portal</th><th>Creada por</th><th>Acciones</th></tr></thead><tbody>
+            <tr><td style="font-weight:600;">📰 Noticias</td><td><code style="font-size:10px;">/api/noticias</code></td><td><span class="badge bg">✅ Activa</span></td><td>Sistema</td><td><em style="font-size:10px;color:#aaa;">Categoría base</em></td></tr>
+            <tr><td style="font-weight:600;">📅 Eventos</td><td><code style="font-size:10px;">/api/eventos</code></td><td><span class="badge bg">✅ Activa</span></td><td>Sistema</td><td><em style="font-size:10px;color:#aaa;">Categoría base</em></td></tr>
+            <tr><td style="font-weight:600;">🏆 Logros Académicos</td><td><code style="font-size:10px;">/api/logros</code></td><td><span class="badge bg">✅ Activa</span></td><td>Superadmin</td><td><div class="cra"><button class="btn btn-o btn-sm">✏️</button><button class="btn btn-d btn-sm">🗑️</button></div></td></tr>
+          </tbody></table>
+        </div></div>
+      </div>
+    </div>
+
+  </div><!-- /admin-content -->
+</div><!-- /view-admin -->
+
+<!-- ══════════════════ MODALES ══════════════════ -->
+<div id="m-noticia" class="moverlay">
+  <div class="modal"><h2>📰 Nueva Noticia</h2>
+    <div class="fg"><label class="fl">Título <span style="color:#aaa;font-size:9px;">(máx. 100 chars)</span></label><input class="fc" placeholder="Título de la noticia..." oninput="charCount(this,100,'cc1')"><div class="cc" id="cc1">0 / 100</div></div>
+    <div class="fg"><label class="fl">Contenido <span style="color:#aaa;font-size:9px;">(máx. 300 chars)</span></label><textarea class="fc" rows="3" placeholder="Descripción breve..." oninput="charCount(this,300,'cc2')"></textarea><div class="cc" id="cc2">0 / 300</div></div>
+    <div class="fr"><div class="fg"><label class="fl">Área generadora</label><select class="fc"><option>Rectorado</option><option>Biblioteca Central</option><option>VRICE</option><option>DTI</option><option>FIC</option></select></div><div class="fg"><label class="fl">Link externo (opcional)</label><input class="fc" placeholder="https://..."></div></div>
+    <div class="fg"><label class="fl">Vigencia</label><select class="fc"><option>Hoy</option><option>3 días</option><option>Esta semana</option><option>Este mes</option><option>Siempre</option><option>Rango de fechas</option></select></div>
+    <div class="modal-acts"><button class="btn btn-o" onclick="closeModal('m-noticia')">Cancelar</button><button class="btn btn-p" onclick="closeModal('m-noticia')">Guardar borrador</button><button class="btn btn-a" onclick="closeModal('m-noticia')">Enviar a publicar</button></div>
+  </div>
+</div>
+
+<div id="m-evento" class="moverlay">
+  <div class="modal"><h2>📅 Nuevo Evento</h2>
+    <div class="fg"><label class="fl">Nombre del evento</label><input class="fc" placeholder="Nombre del evento..."></div>
+    <div class="fr"><div class="fg"><label class="fl">Área responsable</label><select class="fc"><option>FIC</option><option>CITI UHO</option><option>Extensión</option></select></div><div class="fg"><label class="fl">Fecha del evento</label><input class="fc" type="date"></div></div>
+    <div class="fg"><label class="fl">Descripción</label><textarea class="fc" rows="3" placeholder="Descripción breve..."></textarea></div>
+    <div class="fr"><div class="fg"><label class="fl">Datos de contacto</label><input class="fc" placeholder="Teléfono o correo..."></div><div class="fg"><label class="fl">Link convocatoria (opcional)</label><input class="fc" placeholder="https://..."></div></div>
+    <div class="fg"><label class="fl">Vigencia</label><select class="fc"><option>Esta semana</option><option>Este mes</option><option>Siempre</option></select></div>
+    <div class="modal-acts"><button class="btn btn-o" onclick="closeModal('m-evento')">Cancelar</button><button class="btn btn-a" onclick="closeModal('m-evento')">Enviar a publicar</button></div>
+  </div>
+</div>
+
+<div id="m-encuesta" class="moverlay">
+  <div class="modal"><h2>📋 Nueva Encuesta</h2>
+    <div class="fg"><label class="fl">Título de la encuesta</label><input class="fc" placeholder="Título..."></div>
+    <div class="fg"><label class="fl">Tipo de encuesta</label><select class="fc" onchange="encTipo(this)"><option value="i">Encuesta interna (preguntas aquí)</option><option value="e">Solo link externo</option></select></div>
+    <div id="enc-int"><div class="alert a-info" style="margin-bottom:10px;">Máx. 10 preguntas · Máx. 6 opciones por pregunta</div><div class="fg"><label class="fl">Pregunta 1</label><input class="fc" placeholder="Texto de la pregunta..."><select class="fc" style="margin-top:7px;"><option>Selección simple</option><option>Selección múltiple</option><option>Pregunta abierta</option></select></div><button class="btn btn-o btn-sm" style="margin-bottom:14px;">+ Agregar pregunta</button></div>
+    <div id="enc-ext" style="display:none;"><div class="fg"><label class="fl">Link de la encuesta</label><input class="fc" placeholder="https://..."></div></div>
+    <div class="fg"><label class="fl">Vigencia</label><select class="fc"><option>Esta semana</option><option>Este mes</option><option>Siempre</option></select></div>
+    <div class="modal-acts"><button class="btn btn-o" onclick="closeModal('m-encuesta')">Cancelar</button><button class="btn btn-a" onclick="closeModal('m-encuesta')">Enviar a publicar</button></div>
+  </div>
+</div>
+
+<div id="m-usuario" class="moverlay">
+  <div class="modal"><h2>👤 Nuevo Usuario del Sistema</h2>
+    <div class="alert a-info">Solo ingrese el correo @uho.edu.cu. Los datos se obtienen automáticamente de AGA_AUTH.</div>
+    <div class="fg"><label class="fl">Correo institucional</label><input class="fc" placeholder="usuario.apellido@uho.edu.cu"><div class="fh">El usuario debe tener credenciales activas en AGA_AUTH</div></div>
+    <div class="fg"><label class="fl">Rol del sistema</label><select class="fc"><option>Admin</option><option>Gestor de Contenidos</option></select></div>
+    <div class="fg"><label class="fl">Categorías asignadas (para Gestores)</label>
+      <div style="display:flex;flex-wrap:wrap;gap:8px;padding:9px;background:#F8FAFB;border-radius:7px;border:1.5px solid var(--border);">
+        <label style="display:flex;align-items:center;gap:5px;font-size:11px;"><input type="checkbox"> 📰 Noticias</label>
+        <label style="display:flex;align-items:center;gap:5px;font-size:11px;"><input type="checkbox"> 📅 Eventos</label>
+        <label style="display:flex;align-items:center;gap:5px;font-size:11px;"><input type="checkbox"> 📢 Avisos</label>
+        <label style="display:flex;align-items:center;gap:5px;font-size:11px;"><input type="checkbox"> 🔗 Servicios</label>
+        <label style="display:flex;align-items:center;gap:5px;font-size:11px;"><input type="checkbox"> 📋 Encuestas</label>
+      </div>
+    </div>
+    <div class="modal-acts"><button class="btn btn-o" onclick="closeModal('m-usuario')">Cancelar</button><button class="btn btn-p" onclick="closeModal('m-usuario')">Crear usuario</button></div>
+  </div>
+</div>
+
+<div id="m-notifs" class="moverlay">
+  <div class="modal"><h2>🔔 Notificaciones</h2>
+    <div style="display:flex;flex-direction:column;gap:9px;">
+      <div style="background:#FFF3E0;border-radius:7px;padding:11px;font-size:11px;"><strong>⏳ Nueva solicitud</strong><br>Carlos Mendoza publicó "Convocatoria Jornada Científica" <span style="color:#aaa;">· hace 2h</span></div>
+      <div style="background:#FFF3E0;border-radius:7px;padding:11px;font-size:11px;"><strong>⏳ Nueva solicitud</strong><br>Ana García publicó "Festival Cultural Universitario" <span style="color:#aaa;">· hace 5h</span></div>
+      <div style="background:#FFF3E0;border-radius:7px;padding:11px;font-size:11px;"><strong>⏳ Nueva solicitud</strong><br>DTI UHO publicó "Cambios en política de contraseñas WiFi" <span style="color:#aaa;">· hace 1 día</span></div>
+    </div>
+    <div class="modal-acts"><button class="btn btn-p" onclick="closeModal('m-notifs');goPanel('aprobacion')">Ver aprobaciones</button><button class="btn btn-o" onclick="closeModal('m-notifs')">Cerrar</button></div>
+  </div>
+</div>
+
+<script>
+// ─── NAVEGACIÓN PRINCIPAL ──────────────────────────────────────────────────
+const VIEWS = ['portal','login','admin'];
+
+function goView(viewId, panelId) {
+  // Ocultar todas las vistas
+  VIEWS.forEach(v => {
+    const el = document.getElementById('view-' + v);
+    if (el) el.classList.remove('on');
+  });
+  // Mostrar la vista destino
+  const target = document.getElementById('view-' + viewId);
+  if (target) target.classList.add('on');
+
+  // Si es admin, activar el panel correcto
+  if (viewId === 'admin' && panelId) goPanel(panelId);
+}
+
+function goPanel(panelId) {
+  // Ocultar todos los paneles
+  document.querySelectorAll('#admin-content .panel').forEach(p => p.classList.remove('on'));
+  // Mostrar el panel destino
+  const p = document.getElementById('panel-' + panelId);
+  if (p) p.classList.add('on');
+
+  // Actualizar sidebar
+  document.querySelectorAll('#admin-sidebar .sb-item').forEach(i => i.classList.remove('on'));
+  const sbItem = document.querySelector('#admin-sidebar .sb-item[data-panel="' + panelId + '"]');
+  if (sbItem) sbItem.classList.add('on');
+
+  // Actualizar nav-tab activo
+  syncNavTab('admin', panelId);
+
+  // Scroll al tope del contenido
+  const content = document.getElementById('admin-content');
+  if (content) content.scrollTop = 0;
+}
+
+function syncNavTab(viewId, panelId) {
+  document.querySelectorAll('.ntab').forEach(t => t.classList.remove('active'));
+  let match;
+  if (panelId) {
+    match = document.querySelector('.ntab[data-view="' + viewId + '"][data-panel="' + panelId + '"]');
+  } else {
+    match = document.querySelector('.ntab[data-view="' + viewId + '"]');
+  }
+  if (match) match.classList.add('active');
+}
+
+// Click en nav-tabs
+document.querySelectorAll('.ntab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    const view = tab.dataset.view;
+    const panel = tab.dataset.panel;
+    goView(view, panel);
+    syncNavTab(view, panel);
+  });
+});
+
+// Click en sidebar items
+document.querySelectorAll('#admin-sidebar .sb-item').forEach(item => {
+  item.addEventListener('click', () => {
+    goPanel(item.dataset.panel);
+  });
+});
+
+// ─── TABS INTERNAS ──────────────────────────────────────────────────────────
+function iTab(btn, targetId) {
+  // Desactivar todos los tabs del mismo grupo .itabs
+  const group = btn.closest('.itabs');
+  if (group) group.querySelectorAll('.itab').forEach(t => t.classList.remove('on'));
+  btn.classList.add('on');
+
+  // Ocultar solo los hermanos .ipanel del padre del target
+  const target = document.getElementById(targetId);
+  if (!target) return;
+  const parent = target.parentElement;
+  parent.querySelectorAll(':scope > .ipanel').forEach(p => p.classList.remove('on'));
+  target.classList.add('on');
+}
+
+// ─── PORTAL CAUTIVO ─────────────────────────────────────────────────────────
+function phTab(tab) {
+  document.querySelectorAll('#ph-tabs .ph-tab').forEach(t => t.classList.remove('on'));
+  document.querySelectorAll('.ph-sec').forEach(s => s.classList.remove('on'));
+  const idx = {login:0,noticias:1,eventos:2,avisos:3,servicios:4,encuesta:5}[tab];
+  const tabs = document.querySelectorAll('#ph-tabs .ph-tab');
+  if (tabs[idx]) tabs[idx].classList.add('on');
+  const sec = document.getElementById('ph-' + tab);
+  if (sec) sec.classList.add('on');
+}
+function phLogin() {
+  const u = document.getElementById('pu').value.trim();
+  const p = document.getElementById('pp').value;
+  if (!u || !p) { alert('Introduce usuario y contraseña.'); return; }
+  document.getElementById('ph-login-form').style.display = 'none';
+  document.getElementById('ph-logged').style.display = 'block';
+}
+function phLogout() {
+  document.getElementById('ph-login-form').style.display = 'block';
+  document.getElementById('ph-logged').style.display = 'none';
+  document.getElementById('pu').value = '';
+  document.getElementById('pp').value = '';
+}
+function encVotar() {
+  if (!document.querySelector('input[name="e1"]:checked')) { alert('Selecciona una opción.'); return; }
+  alert('¡Gracias por tu respuesta!');
+}
+
+// ─── LOGIN ADMIN ─────────────────────────────────────────────────────────────
+function toggleDenied() {
+  const el = document.getElementById('denied-msg');
+  el.style.display = el.style.display === 'none' ? 'flex' : 'none';
+}
+
+// ─── MODALES ─────────────────────────────────────────────────────────────────
+function openModal(id) { document.getElementById(id).classList.add('on'); }
+function closeModal(id) { document.getElementById(id).classList.remove('on'); }
+document.querySelectorAll('.moverlay').forEach(m =>
+  m.addEventListener('click', e => { if (e.target === m) m.classList.remove('on'); })
+);
+
+// ─── APROBACIÓN ──────────────────────────────────────────────────────────────
+function aprobar(btn) {
+  const card = btn.closest('.acard');
+  card.style.background = '#E8F5E9'; card.style.borderColor = '#A5D6A7';
+  card.querySelector('.acard-acts').innerHTML = '<span class="badge bg">✅ Aprobado y publicado en el portal</span>';
+}
+function rechazar(btn) {
+  const motivo = prompt('Motivo del rechazo:');
+  if (!motivo) return;
+  const card = btn.closest('.acard');
+  card.style.background = '#FFEBEE'; card.style.borderColor = '#FFCDD2';
+  card.querySelector('.acard-acts').innerHTML = `<span class="badge br">❌ Rechazado: ${motivo}</span>`;
+}
+
+// ─── MISC ─────────────────────────────────────────────────────────────────────
+function charCount(el, max, cid) {
+  const n = el.value.length;
+  const c = document.getElementById(cid);
+  if (c) { c.textContent = n + ' / ' + max; c.style.color = n > max ? '#C62828' : n > max*.85 ? '#FF6F00' : '#90A4AE'; }
+}
+function encTipo(sel) {
+  document.getElementById('enc-int').style.display = sel.value === 'i' ? 'block' : 'none';
+  document.getElementById('enc-ext').style.display = sel.value === 'e' ? 'block' : 'none';
+}
+
+// ─── INIT ─────────────────────────────────────────────────────────────────────
+goView('portal');
+syncNavTab('portal');
+document.querySelector('.ntab[data-view="portal"]').classList.add('active');
+</script>
+</body>
+</html>

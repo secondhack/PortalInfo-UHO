@@ -1,0 +1,25 @@
+{
+    "evidence":  [
+                     "NAVEGADOR_FINAL.json",
+                     "E2E_FINAL.json",
+                     "RENDIMIENTO_FINAL.json"
+                 ],
+    "report":  "ENTREGA_FINAL.md",
+    "remote_publication":  false,
+    "applied_migrations":  36,
+    "browser":  "Chrome 157.0.8103.39",
+    "date":  "2026-11-14",
+    "portal_bytes":  24539,
+    "http_assertions":  29,
+    "scope":  "local-only",
+    "tests":  {
+                  "backend":  118,
+                  "failed":  0,
+                  "browser":  12,
+                  "total":  173,
+                  "portal_dom":  17,
+                  "skipped":  0,
+                  "react":  26
+              },
+    "new_migrations":  0
+}

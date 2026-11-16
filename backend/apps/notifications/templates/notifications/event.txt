@@ -1,0 +1,7 @@
+PortalInfo UHO
+{{ notification.title }}
+
+{{ notification.message }}
+
+Referencia dentro del CMS: {{ path }}
+{% if notification.demo %}Dato de demostración identificado como DEMO.{% endif %}

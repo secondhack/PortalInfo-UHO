@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="referrer" content="no-referrer">
+  <meta name="portal-api-base" content="__PORTAL_API_BASE__">
+  <meta name="portal-auth-base" content="__PORTAL_AUTH_BASE__">
+  <meta name="description" content="Información y acceso de demostración a la red de la Universidad de Holguín.">
+  <title>PortalInfo · Universidad de Holguín</title>
+  <style>/* PORTAL_CSS */</style>
+</head>
+<body>
+  <a class="skip-link" href="#login">Ir al inicio de sesión</a>
+  <header class="masthead">
+    <div class="container brand-row"><a class="brand" href="#login" aria-label="Universidad de Holguín, inicio"><span class="wordmark" aria-hidden="true">UHO<span>.</span></span><span>Universidad de Holguín<small>PORTAL DE LA RED UNIVERSITARIA</small></span></a><span class="network"><span aria-hidden="true">●</span> <span id="network-label">Red WiFi · UHO</span></span></div>
+  </header>
+  <main class="container">
+    <div class="welcome"><p class="eyebrow">CONECTA CON TU UNIVERSIDAD</p><h1>Tu campus, más cerca.</h1><p id="welcome-text">Información, servicios y comunidad en un mismo lugar.</p></div>
+    <div class="portal-layout">
+      <aside class="access-column">
+        <section id="login" class="card access-card" aria-labelledby="login-title" tabindex="-1">
+          <div class="card-heading"><span class="step" aria-hidden="true">↗</span><span class="eyebrow">ACCESO A LA RED</span></div>
+          <h2 id="login-title">Bienvenido a la UHO</h2>
+          <p class="text-muted">Inicia sesión con tu cuenta de demostración.</p>
+          <form id="login-form" aria-describedby="demo-note login-message">
+            <div class="mb-3"><label for="username" class="form-label">Usuario</label><input id="username" name="username" class="form-control" autocomplete="username" autocapitalize="none" spellcheck="false" maxlength="150" required placeholder="Tu usuario de demostración"></div>
+            <div class="mb-3"><label for="password" class="form-label">Contraseña</label><input id="password" name="password" class="form-control" type="password" autocomplete="current-password" maxlength="256" required></div>
+            <button id="login-submit" class="btn btn-primary full" type="submit">Iniciar sesión <span aria-hidden="true">→</span></button>
+          </form>
+          <div id="session" hidden><div class="identity"><span id="avatar" class="avatar" aria-hidden="true"></span><div><strong id="visitor-name"></strong><p id="visitor-type" class="text-muted"></p></div></div><p class="session-ok">Sesión de demostración activa</p><button id="logout" type="button" class="btn btn-outline full">Cerrar sesión</button></div>
+          <p id="login-message" role="status" aria-live="polite"></p>
+          <p id="demo-note" class="demo-note">Entorno de demostración: el acceso a Internet no se modifica.</p>
+        </section>
+        <section class="privacy" aria-labelledby="privacy-title"><h2 id="privacy-title">Tu privacidad importa</h2><p>Registramos fecha, IP, navegador, secciones e información consultada para estadísticas y seguridad. La identidad de sesión se guarda en los registros mediante un identificador seudónimo.</p><p>No guardamos contraseñas introducidas ni fotografías institucionales. Solo el personal autorizado puede consultar los registros.</p><details><summary>Sesiones y respuestas</summary><p>La sesión usa una cookie segura del servidor. Una encuesta anónima puede guardar una cookie durante 90 días para evitar votos repetidos; se elimina desde tu navegador. El plazo de conservación de los registros lo establece la administración. No incluyas datos personales en respuestas abiertas.</p></details></section>
+      </aside>
+      <section class="information" aria-labelledby="information-title">
+        <div class="section-top"><div><p class="eyebrow">VIDA UNIVERSITARIA</p><h2 id="information-title">Lo que pasa en la UHO</h2></div><button id="refresh" class="btn btn-outline" type="button" aria-label="Actualizar configuración y contenidos">Actualizar</button></div>
+        <nav id="navigation" class="nav" aria-label="Secciones del portal"><button type="button" class="nav-link" id="login-link">Inicio de sesión</button></nav>
+        <div id="content-status" role="status" aria-live="polite" class="load-status">Cargando información institucional…</div>
+        <div id="content" aria-busy="true"><div class="empty"><span class="empty-symbol" aria-hidden="true">↗</span><h3>La universidad a tu alcance</h3><p>El acceso a tu cuenta está disponible mientras se carga la información.</p></div></div>
+        <noscript><p class="alert">Activa JavaScript para iniciar sesión y consultar la información. Este portal no necesita recursos de Internet.</p></noscript>
+      </section>
+    </div>
+  </main>
+  <footer class="container footer"><span><strong>UHO</strong> · Universidad de Holguín</span><span>PortalInfo · Información que nos conecta</span></footer>
+  <script>/* PORTAL_JS */</script>
+</body>
+</html>

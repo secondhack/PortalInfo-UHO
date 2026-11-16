@@ -1,0 +1,3 @@
+-r requirements.txt
+# Configuración orientativa Linux, no se usa en la demostración Windows.
+gunicorn>=23,<24; platform_system != 'Windows'

@@ -1,0 +1,1148 @@
+=== FOLIO 1 ===
+PortalInfo UHO — Sistema de Gestión de Contenidos para el Portal Cautivo Universidad de Holguín — UHO 
+Documento de Requerimientos — Versión 1.0 — 2025   Página 1 de 24 
+UNIVERSIDAD DE HOLGUÍN 
+Dirección General de Informatización 
+ 
+PortalInfo UHO 
+Sistema de Gestión de Contenidos para el Portal Cautivo Institucional 
+ 
+Documento Especificación de Requerimientos de 
+Software (SRS) 
+Versión 1.0 
+Fecha 2025 
+Institución Universidad de Holguín (UHO) 
+Clasificación Uso interno institucional 
+  
+
+=== FOLIO 2 ===
+PortalInfo UHO — Sistema de Gestión de Contenidos para el Portal Cautivo Universidad de Holguín — UHO 
+Documento de Requerimientos — Versión 1.0 — 2025   Página 2 de 24 
+1. INTRODUCCIÓN 
+ 
+1.1 Nombre del Sistema 
+PortalInfo UHO 
+Sistema de Gestión de Contenidos para el Portal Cautivo Institucional de la Universidad de Holguín. 
+ 
+1.2 Descripción General 
+La Universidad de Holguín (UHO) cuenta con un Portal Cautivo basado en pfSense que intercepta el 
+tráfico WiFi de los usuarios antes de autenticarlos y concederles acceso a Internet. Actualmente este 
+portal muestra únicamente un formulario de autenticación (usuario y contraseña). 
+ 
+PortalInfo UHO es un sistema que extiende este portal cautivo para convertirlo en un canal de 
+comunicación institucional activo. El sistema consta de dos componentes principales: 
+• Frontend del Portal Cautivo: página HTML+Bootstrap+JS optimizada para carga en 1-2 
+segundos, ejecutada en el contexto pfSense, que muestra noticias, eventos, avisos, servicios y 
+encuestas institucionales consumidos desde una API REST. 
+• Backend de Administración (CMS): aplicación web desarrollada con Django y React, con base 
+de datos PostgreSQL, que permite gestionar todos los contenidos del portal, controlar roles y 
+permisos, aprobar publicaciones, analizar estadísticas de uso y auditar el acceso. 
+ 
+1.3 Alcance del Documento 
+Este documento especifica los requerimientos funcionales y no funcionales del sistema PortalInfo UHO, 
+incluyendo: 
+1. Requerimientos generales y específicos de la UHO 
+2. Requerimientos funcionales detallados por módulo 
+3. Requerimientos no funcionales 
+4. Flujo general del sistema 
+5. Casos de uso principales 
+6. Modelo de datos conceptual 
+7. Arquitectura técnica propuesta 
+8. Roles y permisos 
+9. Glosario y referencias 
+ 
+1.4 Definiciones, Acrónimos y Abreviaturas 
+Término Definición 
+UHO Universidad de Holguín 
+pfSense Distribución de firewall/router open-source utilizada por la UHO 
+Portal Cautivo Página web mostrada automáticamente antes de autenticar al 
+usuario en la red WiFi 
+
+=== FOLIO 3 ===
+PortalInfo UHO — Sistema de Gestión de Contenidos para el Portal Cautivo Universidad de Holguín — UHO 
+Documento de Requerimientos — Versión 1.0 — 2025   Página 3 de 24 
+AGA_AUTH Sistema de Autenticación Centralizada de la UHO (auth.uho.edu.cu) 
+SIGENU Sistema Integral de Gestión de la Educación Superior – Base de 
+datos de estudiantes 
+ASSET Sistema de gestión de activos/trabajadores – Base de datos de 
+trabajadores 
+CMS Content Management System – Sistema de Gestión de Contenidos 
+SRS Software Requirements Specification – Especificación de 
+Requerimientos de Software 
+API REST Interfaz de Programación de Aplicaciones de tipo REST 
+CRUD Create, Read, Update, Delete – operaciones básicas sobre datos 
+RF Requerimiento Funcional 
+RNF Requerimiento No Funcional 
+RGPD/PDP Regulaciones de Protección de Datos Personales 
+ 
+  
+
+=== FOLIO 4 ===
+PortalInfo UHO — Sistema de Gestión de Contenidos para el Portal Cautivo Universidad de Holguín — UHO 
+Documento de Requerimientos — Versión 1.0 — 2025   Página 4 de 24 
+2. REQUERIMIENTOS GENERALES DE LA UHO 
+ 
+Todo producto de software desarrollado para la Universidad de Holguín debe cumplir los siguientes 
+requerimientos generales, establecidos por la política institucional de informatización: 
+ 
+2.1 Centrado en el Usuario (UX) 
+• El sistema debe estar diseñado priorizando la experiencia del usuario final, tanto para los 
+visitantes del Portal Cautivo (estudiantes y trabajadores) como para los administradores y 
+gestores de contenidos. 
+• El Portal Cautivo debe ser perceptible y funcional en menos de 15 segundos por el usuario 
+promedio. 
+• La interfaz administrativa debe seguir principios de usabilidad: consistencia, feedback visual, 
+prevención de errores y recuperación fácil ante errores. 
+• El sistema debe ser accesible para usuarios con capacidades diferentes, siguiendo las pautas 
+WCAG 2.1 nivel AA. 
+ 
+2.2 Ciberseguridad 
+• El sistema debe prever y mitigar los riesgos asociados a ciberseguridad en todas sus capas 
+(frontend, API, backend, base de datos). 
+• Se deben implementar mecanismos de seguridad para evitar vulnerabilidades conocidas: SQL 
+Injection, XSS, CSRF, ataques de fuerza bruta, inyección de código, etc. 
+• Todas las comunicaciones deben cifrarse mediante HTTPS/TLS. 
+• Se deben generar logs estructurados de todas las acciones de los usuarios en el sistema 
+(administrativo y portal cautivo), incluyendo: usuario, tipo_usuario, acción, IP, dispositivo, 
+fecha/hora. 
+• El sistema de logs del Portal Cautivo debe permitir detectar posibles usos compartidos de 
+cuentas mediante análisis de IPs y dispositivos. 
+• Se debe implementar un sistema de auditoría completo con trazabilidad de cambios en 
+contenidos. 
+ 
+2.3 Interoperabilidad 
+• El sistema debe ser interoperable con los sistemas de registros primarios de la UHO: 
+◦ SIGENU: Sistema de Gestión de Estudiantes. 
+◦ ASSET: Sistema de Gestión de Trabajadores. 
+◦ AGA_AUTH: Sistema de Autenticación Centralizada (auth.uho.edu.cu). 
+• El sistema debe exponer una API REST con estándares internacionales (OpenAPI/Swagger) 
+que facilite la integración con el ecosistema de aplicaciones de la UHO. 
+• La autenticación de usuarios debe integrarse con AGA_AUTH, sin duplicar credenciales. 
+ 
+2.4 Sostenibilidad y Calidad 
+
+=== FOLIO 5 ===
+PortalInfo UHO — Sistema de Gestión de Contenidos para el Portal Cautivo Universidad de Holguín — UHO 
+Documento de Requerimientos — Versión 1.0 — 2025   Página 5 de 24 
+• El código fuente debe estar alojado y versionado en el GitLab de la UHO o en GitHub 
+(github.com) si el GitLab institucional no estuviera activo. 
+• El sistema debe garantizar actualizaciones sistemáticas desde el repositorio (CI/CD). 
+• La aplicación debe estar desplegada en el entorno de desarrollo de la UHO o en un entorno 
+local con Docker para su entrega. 
+• Se debe incluir documentación técnica, de instalación, de uso y de mantenimiento. 
+• El código debe seguir buenas prácticas de desarrollo: comentarios, nombres de variables 
+descriptivos, separación de responsabilidades. 
+ 
+2.5 Protección de Datos Personales 
+• El sistema debe cumplir las regulaciones vigentes para la protección de datos personales de 
+los usuarios. 
+• Los datos personales (foto, nombre completo, DNI, tipo de usuario) provenientes de 
+AGA_AUTH deben tratarse con confidencialidad y no almacenarse permanentemente en el 
+sistema sin consentimiento. 
+• Los logs de acceso deben almacenarse de forma segura y con acceso restringido. 
+• Se debe informar al usuario qué datos se recopilan y con qué propósito. 
+ 
+2.6 Identidad Visual y Estándares UHO 
+• La interfaz (Portal Cautivo y panel administrativo) debe ajustarse al Manual de Identidad de la 
+UHO: colores corporativos, tipografía, logo y estilo visual institucional. 
+• Los sistemas web deben ser completamente responsivos (responsive design), adaptándose a 
+dispositivos móviles, tabletas y computadoras de escritorio. 
+ 
+2.7 Gestión de Nomencladores 
+• Todos los nomencladores (áreas, departamentos, tipos de recursos, carreras, cargos, 
+categorías de contenido, etc.) deben ser gestionables como CRUD completo desde el panel de 
+administración. 
+• No deben existir valores fijos en el código fuente que deberían ser configurables. 
+ 
+2.8 Roles y Permisos 
+• El sistema debe contar con un sistema de roles y permisos granular, configurable desde la 
+administración. 
+• Los roles mínimos requeridos son: Superadmin, Admin y Gestor de Contenidos. 
+• Los permisos deben ser asignables por categoría de contenido (Noticias, Eventos, Avisos, 
+Servicios, Encuestas y categorías creadas dinámicamente). 
+ 
+  
+
+=== FOLIO 6 ===
+PortalInfo UHO — Sistema de Gestión de Contenidos para el Portal Cautivo Universidad de Holguín — UHO 
+Documento de Requerimientos — Versión 1.0 — 2025   Página 6 de 24 
+3. REQUERIMIENTOS FUNCIONALES 
+ 
+A continuación se detallan los requerimientos funcionales agrupados por módulo del sistema. 
+ 
+3.1 Módulo de Autenticación y Control de Acceso 
+ 
+ID Requisito Descripción Prioridad 
+RF-
+01 
+Autenticación via AGA_AUTH El sistema debe autenticar a todos los usuarios 
+(portal cautivo y administración) mediante el 
+Sistema de Autenticación Centralizada 
+AGA_AUTH (https://auth.uho.edu.cu). No se 
+deben almacenar contraseñas localmente. 
+Alta 
+RF-
+02 
+Control de acceso por registro 
+previo 
+Para el panel administrativo, solo podrán 
+acceder usuarios previamente registrados en el 
+sistema por un Superadmin o Admin, aunque 
+sus credenciales AGA_AUTH sean válidas. Un 
+usuario con credenciales válidas pero sin 
+registro en el sistema debe recibir el mensaje 
+'No tiene acceso a este sistema'. 
+Alta 
+RF-
+03 
+Registro de usuarios admin 
+por correo institucional 
+Al crear un usuario administrativo, solo se debe 
+ingresar su correo institucional @uho.edu.cu. El 
+sistema obtendrá los datos personales desde 
+AGA_AUTH. 
+Alta 
+RF-
+04 
+Logout seguro El sistema debe cerrar la sesión del usuario de 
+forma segura, invalidando el token en el 
+servidor. 
+Alta 
+RF-
+05 
+Log de autenticación del portal 
+cautivo 
+Cada inicio de sesión en el portal cautivo debe 
+registrar: usuario, tipo_usuario 
+(Institucional|Trabajadores|Estudiantes), 
+fecha/hora, IP, dispositivo (User-Agent). 
+Alta 
+RF-
+06 
+Bloqueo por intentos fallidos Tras N intentos fallidos de autenticación 
+configurables, el sistema debe bloquear 
+temporalmente el acceso desde esa IP. 
+Media 
+ 
+3.2 Módulo del Portal Cautivo (Frontend pfSense) 
+ 
+El frontend del portal cautivo es la página HTML+Bootstrap+JS que se despliega en pfSense. Sus 
+requerimientos son: 
+ 
+ID Requisito Descripción Prioridad 
+RF-
+07 
+Carga ultrarrápida El portal cautivo debe cargar completamente en 
+1-2 segundos en conexiones móviles estándar. 
+No debe incluir imágenes de contenido, videos 
+ni documentos. 
+Alta 
+
+=== FOLIO 7 ===
+PortalInfo UHO — Sistema de Gestión de Contenidos para el Portal Cautivo Universidad de Holguín — UHO 
+Documento de Requerimientos — Versión 1.0 — 2025   Página 7 de 24 
+RF-
+08 
+Compatibilidad móvil universal Debe funcionar en navegadores limitados de 
+Android e iOS, sin dependencias externas que 
+requieran conexión a Internet (CDN). Bootstrap 
+y JS deben estar en el propio HTML o servidos 
+localmente. 
+Alta 
+RF-
+09 
+Formulario de Login integrado El portal cautivo debe incluir el formulario de 
+usuario/contraseña actual de pfSense, integrado 
+con AGA_AUTH. Al autenticarse correctamente, 
+muestra nombre completo y foto del usuario 
+(base64 desde AGA_AUTH). 
+Alta 
+RF-
+10 
+Sección de Noticias Muestra las noticias activas consumidas desde 
+la API. Cada noticia incluye: título, contenido 
+breve, área que la generó y fecha. Sin imágenes 
+ni documentos adjuntos. 
+Alta 
+RF-
+11 
+Sección de Eventos Muestra los eventos activos: nombre del evento, 
+área responsable, descripción breve, fecha de 
+inicio, datos de contacto, link de convocatoria 
+(opcional). 
+Alta 
+RF-
+12 
+Sección de Avisos Muestra avisos activos con título y contenido. Alta 
+RF-
+13 
+Sección de Servicios RedUHO Muestra un listado de servicios de la red 
+universitaria: nombre, descripción breve y link 
+de acceso. 
+Alta 
+RF-
+14 
+Sección de Encuestas Muestra encuestas activas de respuesta rápida. 
+Puede incluir encuestas con preguntas directas 
+o solo un link externo. 
+Alta 
+RF-
+15 
+Carga dinámica desde API Todas las secciones de contenido se cargan via 
+fetch() desde los endpoints de la API REST del 
+backend (ej: 
+https://portalapi.uho.edu.cu/api/noticias). Si la 
+API no responde, el portal sigue funcionando 
+normalmente en su parte de autenticación. 
+Alta 
+RF-
+16 
+Adaptabilidad de secciones 
+visibles 
+El portal cautivo debe adaptar dinámicamente 
+las secciones mostradas según la configuración 
+del backend, sin necesidad de modificar el 
+HTML en pfSense. 
+Alta 
+RF-
+17 
+Diseño mobile-first El diseño debe estar orientado 
+fundamentalmente a dispositivos móviles, pero 
+también funcionar correctamente en pantallas 
+de escritorio. 
+Alta 
+RF-
+18 
+Registro de visualizaciones Cada vez que un usuario carga el portal cautivo 
+o accede a una sección de contenido, el sistema 
+debe registrar la vista via API (IP, tipo 
+dispositivo, sección, ítem visto, timestamp). 
+Media 
+ 
+3.3 Módulo de Gestión de Contenidos (CRUD) 
+ 
+
+=== FOLIO 8 ===
+PortalInfo UHO — Sistema de Gestión de Contenidos para el Portal Cautivo Universidad de Holguín — UHO 
+Documento de Requerimientos — Versión 1.0 — 2025   Página 8 de 24 
+Este módulo aplica a todas las categorías de contenido: Noticias, Eventos, Avisos, Servicios RedUHO, 
+Encuestas y categorías dinámicas creadas por el Superadmin. 
+ 
+ID Requisito Descripción Prioridad 
+RF-
+19 
+CRUD de Noticias Crear, editar, eliminar y listar noticias. Campos: 
+título (límite configurable de caracteres), 
+contenido (límite configurable), área 
+generadora, fecha de publicación, fecha de 
+ocultamiento, link opcional. 
+Alta 
+RF-
+20 
+CRUD de Eventos Crear, editar, eliminar y listar eventos. Campos: 
+nombre del evento, área responsable, 
+descripción (límite configurable), fecha de inicio, 
+datos de contacto, link de convocatoria 
+(opcional). 
+Alta 
+RF-
+21 
+CRUD de Avisos Crear, editar, eliminar y listar avisos. Campos: 
+título (límite configurable), contenido (límite 
+configurable). 
+Alta 
+RF-
+22 
+CRUD de Servicios RedUHO Crear, editar, eliminar y listar servicios. Campos: 
+nombre del servicio, descripción breve (límite 
+configurable), link de acceso. 
+Alta 
+RF-
+23 
+CRUD de Encuestas Crear, editar, eliminar y listar encuestas. Tipos 
+de preguntas: selección simple, selección 
+múltiple, pregunta abierta, o solo link externo. 
+Configuración de número máximo de preguntas 
+y opciones desde la administración global. 
+Alta 
+RF-
+24 
+Control de vigencia temporal Al crear o editar cualquier contenido, se debe 
+definir su período de visibilidad: hoy, 3 días, 
+esta semana, este mes, siempre, o rango de 
+fechas personalizado. El sistema oculta 
+automáticamente el contenido al expirar. 
+Alta 
+RF-
+25 
+Switch de visibilidad rápida Cada elemento de contenido debe tener un 
+botón switch (toggle) que permita ocultarlo o 
+mostrarlo de forma inmediata, 
+independientemente de las fechas configuradas. 
+Alta 
+RF-
+26 
+Límite global de contenidos 
+visibles 
+Desde la configuración global, el 
+Superadmin/Admin debe poder definir cuántos 
+ítems de cada categoría se mostrarán 
+simultáneamente en el portal cautivo. 
+Alta 
+RF-
+27 
+Límites de caracteres por 
+campo 
+El Superadmin/Admin debe poder configurar el 
+número máximo de caracteres para título y 
+descripción de cada categoría de contenido. El 
+sistema debe validar estos límites al 
+crear/editar. 
+Alta 
+RF-
+28 
+Categorías dinámicas El Superadmin puede crear nuevas categorías 
+de contenido (además de las predefinidas). La 
+API y el portal cautivo deben reconocer 
+automáticamente estas nuevas categorías. 
+Media 
+ 
+
+=== FOLIO 9 ===
+PortalInfo UHO — Sistema de Gestión de Contenidos para el Portal Cautivo Universidad de Holguín — UHO 
+Documento de Requerimientos — Versión 1.0 — 2025   Página 9 de 24 
+3.4 Módulo de Flujo de Aprobación de Contenidos 
+ 
+ID Requisito Descripción Prioridad 
+RF-
+29 
+Publicación con aprobación Cuando un Gestor de Contenidos crea un nuevo 
+ítem y lo marca como 'Publicar', el contenido no 
+aparece en el portal cautivo hasta ser aprobado 
+por un Admin. 
+Alta 
+RF-
+30 
+Alerta de cantidad máxima Si al publicar un nuevo ítem se excede la 
+cantidad máxima permitida para esa categoría, 
+el sistema debe alertar al gestor (pero permitir 
+enviar para aprobación). 
+Alta 
+RF-
+31 
+Cola de aprobación para 
+Admins 
+Los Admins deben tener una vista de todos los 
+contenidos pendientes de aprobación, con 
+opciones de aprobar o rechazar (con motivo). 
+Alta 
+RF-
+32 
+Ediciones menores sin 
+reaprobación 
+El Admin puede editar directamente el contenido 
+aprobado sin necesidad de nueva aprobación 
+(ej: correcciones tipográficas). El Gestor sí 
+requiere reaprobación. 
+Media 
+ 
+3.5 Módulo de Notificaciones 
+ 
+ID Requisito Descripción Prioridad 
+RF-
+33 
+Notificación in-app (campanita) El sistema debe mostrar un ícono de campana 
+con contador de notificaciones no leídas en el 
+panel administrativo. 
+Alta 
+RF-
+34 
+Notificación por correo El sistema debe enviar notificaciones por correo 
+electrónico institucional (@uho.edu.cu) en los 
+eventos definidos. 
+Alta 
+RF-
+35 
+Eventos notificables para 
+Admin 
+El Admin debe ser notificado cuando: (a) se 
+publica un nuevo contenido pendiente de 
+aprobación. 
+Alta 
+RF-
+36 
+Eventos notificables para 
+Gestores 
+El Gestor debe ser notificado cuando: (a) su 
+contenido es aprobado o rechazado, (b) su 
+contenido es ocultado por expiración de fecha. 
+Alta 
+ 
+3.6 Módulo de Roles y Permisos 
+ 
+ID Requisito Descripción Prioridad 
+RF-
+37 
+Superadmin Rol de máximo privilegio: puede crear Admins y 
+Gestores, crear categorías dinámicas, 
+configurar parámetros globales del sistema, 
+acceder a todas las estadísticas y auditorías. 
+Alta 
+
+=== FOLIO 10 ===
+PortalInfo UHO — Sistema de Gestión de Contenidos para el Portal Cautivo Universidad de Holguín — UHO 
+Documento de Requerimientos — Versión 1.0 — 2025   Página 10 de 24 
+RF-
+38 
+Admin Puede crear Gestores, aprobar/rechazar 
+contenidos, ver estadísticas, gestionar 
+nomencladores, configurar visibilidad de 
+categorías en el portal. 
+Alta 
+RF-
+39 
+Gestor de Contenidos Puede crear, editar y publicar (para aprobación) 
+contenidos en las categorías que tenga 
+asignadas. 
+Alta 
+RF-
+40 
+Asignación de categorías por 
+usuario 
+El Admin/Superadmin puede asignar a cada 
+Gestor las categorías de contenido que puede 
+gestionar (incluyendo categorías dinámicas). 
+Alta 
+RF-
+41 
+Vista de contenidos activos Cada usuario del sistema debe poder ver, según 
+sus permisos, qué contenidos están 
+actualmente activos en el portal cautivo. 
+Alta 
+ 
+3.7 Módulo de Estadísticas y Analítica 
+ 
+ID Requisito Descripción Prioridad 
+RF-
+42 
+Dashboard principal El panel administrativo debe incluir un 
+dashboard con: total de contenidos por 
+categoría (activos/inactivos/pendientes), 
+accesos al portal cautivo en el período, 
+contenidos más vistos, usuarios activos del 
+sistema. 
+Alta 
+RF-
+43 
+Estadísticas del portal cautivo El sistema debe recopilar y mostrar métricas del 
+portal cautivo: visitas por tipo de usuario 
+(Institucional/Trabajadores/Estudiantes), 
+distribución por dispositivo, franjas horarias de 
+mayor uso, contenidos más vistos por categoría. 
+Alta 
+RF-
+44 
+Log estructurado de acceso Cada acceso al portal cautivo debe registrar: 
+usuario, tipo_usuario, fecha/hora, IP, User-
+Agent (dispositivo), sección visitada, ítem 
+visitado. 
+Alta 
+RF-
+45 
+Análisis de ciberseguridad El módulo de estadísticas debe incluir alertas o 
+reportes de posibles usos compartidos de 
+cuentas (mismo usuario desde múltiples IPs en 
+períodos cortos, diferentes dispositivos, etc.). 
+Media 
+RF-
+46 
+Resultados de encuestas El sistema debe mostrar los resultados de 
+encuestas con estadísticos y gráficos (por 
+pregunta, distribución de respuestas). 
+Alta 
+RF-
+47 
+Exportación de reportes Los reportes estadísticos deben poder 
+exportarse en formato CSV o PDF. 
+Baja 
+ 
+3.8 Módulo de Configuración Global 
+ 
+ID Requisito Descripción Prioridad 
+
+=== FOLIO 11 ===
+PortalInfo UHO — Sistema de Gestión de Contenidos para el Portal Cautivo Universidad de Holguín — UHO 
+Documento de Requerimientos — Versión 1.0 — 2025   Página 11 de 24 
+RF-
+48 
+Gestión de nomencladores CRUD completo para: áreas/departamentos, 
+tipos de servicios, categorías de contenido, 
+cargos, carreras y cualquier nomenclador 
+utilizado en el sistema. 
+Alta 
+RF-
+49 
+Configuración de límites El Superadmin/Admin puede configurar: máximo 
+de ítems visibles por categoría en el portal, 
+límite de caracteres por campo de cada 
+categoría, número máximo de 
+preguntas/opciones en encuestas. 
+Alta 
+RF-
+50 
+Habilitación/deshabilitación de 
+secciones 
+El Superadmin/Admin puede habilitar o 
+deshabilitar cualquier sección del portal cautivo. 
+El portal se adapta automáticamente. 
+Alta 
+RF-
+51 
+API de configuración El backend debe exponer un endpoint de 
+configuración que el portal cautivo consulte para 
+saber qué secciones mostrar y con qué 
+parámetros. 
+Alta 
+ 
+3.9 API REST (Interfaz de Integración) 
+ 
+ID Requisito Descripción Prioridad 
+RF-
+52 
+Endpoint de noticias GET /api/noticias – retorna lista de noticias 
+activas en formato JSON. 
+Alta 
+RF-
+53 
+Endpoint de eventos GET /api/eventos – retorna lista de eventos 
+activos. 
+Alta 
+RF-
+54 
+Endpoint de avisos GET /api/avisos – retorna lista de avisos activos. Alta 
+RF-
+55 
+Endpoint de servicios GET /api/servicios – retorna lista de servicios 
+RedUHO activos. 
+Alta 
+RF-
+56 
+Endpoint de encuestas GET /api/encuestas – retorna encuestas activas 
+con sus preguntas y opciones. 
+Alta 
+RF-
+57 
+Endpoint de configuración GET /api/config – retorna la configuración del 
+portal (secciones habilitadas, límites, etc.). 
+Alta 
+RF-
+58 
+Endpoint de registro de vistas POST /api/vistas – registra una vista de 
+contenido por parte de un usuario del portal 
+cautivo. 
+Alta 
+RF-
+59 
+Endpoint de respuestas a 
+encuestas 
+POST /api/encuestas/{id}/respuestas – registra 
+respuestas de usuario a una encuesta. 
+Alta 
+RF-
+60 
+Endpoint de categorías 
+dinámicas 
+GET /api/categorias – retorna las categorías 
+activas y sus contenidos. Incluye categorías 
+dinámicas creadas por el Superadmin. 
+Alta 
+RF-
+61 
+Documentación 
+Swagger/OpenAPI 
+Toda la API debe estar documentada con 
+Swagger/OpenAPI y accesible desde /api/docs. 
+Alta 
+ 
+  
+
+=== FOLIO 12 ===
+PortalInfo UHO — Sistema de Gestión de Contenidos para el Portal Cautivo Universidad de Holguín — UHO 
+Documento de Requerimientos — Versión 1.0 — 2025   Página 12 de 24 
+4. REQUERIMIENTOS NO FUNCIONALES 
+ 
+4.1 Rendimiento 
+ID Requisito Descripción Prioridad 
+RNF-
+01 
+Tiempo de carga del portal 
+cautivo 
+El portal cautivo debe cargar completamente 
+en 1-2 segundos en conexiones WiFi 
+universitarias estándar. 
+Alta 
+RNF-
+02 
+Tiempo de respuesta de la 
+API 
+Los endpoints de la API deben responder en 
+menos de 500ms bajo carga normal. 
+Alta 
+RNF-
+03 
+Concurrencia El sistema debe soportar al menos 200 
+conexiones simultáneas al portal cautivo sin 
+degradación del servicio. 
+Alta 
+RNF-
+04 
+Tamaño del HTML del portal 
+cautivo 
+El HTML completo del portal cautivo (incluido 
+Bootstrap y JS inline) no debe superar los 
+200KB. 
+Alta 
+ 
+4.2 Seguridad 
+ID Requisito Descripción Prioridad 
+RNF-
+05 
+HTTPS obligatorio Todas las comunicaciones entre el portal 
+cautivo, la API y el panel de administración 
+deben realizarse mediante HTTPS. 
+Alta 
+RNF-
+06 
+Protección contra inyecciones El sistema debe implementar protección contra 
+SQL Injection, XSS y CSRF. 
+Alta 
+RNF-
+07 
+Tokens de sesión seguros Los tokens de sesión deben ser seguros, con 
+expiración configurable y renovación 
+automática. 
+Alta 
+RNF-
+08 
+Rate limiting en la API La API debe implementar rate limiting para 
+prevenir abuso. 
+Alta 
+RNF-
+09 
+Logs de seguridad Se deben generar logs de todos los eventos de 
+seguridad: intentos fallidos, accesos no 
+autorizados, cambios en roles. 
+Alta 
+RNF-
+10 
+Validación de entrada Toda entrada de usuario debe ser validada y 
+saneada en el servidor. 
+Alta 
+ 
+4.3 Usabilidad 
+ID Requisito Descripción Prioridad 
+RNF-
+11 
+Responsive design Todo el sistema (portal cautivo y 
+administración) debe ser completamente 
+responsivo. 
+Alta 
+
+=== FOLIO 13 ===
+PortalInfo UHO — Sistema de Gestión de Contenidos para el Portal Cautivo Universidad de Holguín — UHO 
+Documento de Requerimientos — Versión 1.0 — 2025   Página 13 de 24 
+RNF-
+12 
+Mobile-first en el portal cautivo El portal cautivo debe ser diseñado mobile-first, 
+optimizado para pantallas de 360-480px. 
+Alta 
+RNF-
+13 
+Accesibilidad WCAG 2.1 AA La interfaz debe cumplir con las pautas de 
+accesibilidad WCAG 2.1 nivel AA. 
+Media 
+RNF-
+14 
+Consistencia visual La interfaz debe ajustarse al Manual de 
+Identidad de la UHO. 
+Alta 
+RNF-
+15 
+Mensajes de error claros El sistema debe mostrar mensajes de error 
+descriptivos y orientados al usuario. 
+Alta 
+ 
+4.4 Mantenibilidad y Portabilidad 
+ID Requisito Descripción Prioridad 
+RNF-
+16 
+Control de versiones El código fuente debe estar en el GitLab de la 
+UHO o en GitHub, con historial de commits y 
+ramas por versión. 
+Alta 
+RNF-
+17 
+Despliegue con Docker El sistema debe poder desplegarse con Docker 
+Compose para entornos de desarrollo y 
+producción. 
+Alta 
+RNF-
+18 
+Documentación técnica Debe existir documentación de instalación, 
+configuración, API (Swagger), arquitectura y 
+manual de usuario. 
+Alta 
+RNF-
+19 
+Independencia de pfSense Los cambios en el contenido y la configuración 
+del portal no deben requerir modificaciones en 
+el HTML de pfSense, excepto cambios de 
+lógica o diseño justificados. 
+Alta 
+ 
+4.5 Interoperabilidad 
+ID Requisito Descripción Prioridad 
+RNF-
+20 
+Integración AGA_AUTH La autenticación debe funcionar 
+exclusivamente a través de AGA_AUTH, sin 
+credenciales locales. 
+Alta 
+RNF-
+21 
+API estándar OpenAPI La API REST debe seguir el estándar OpenAPI 
+3.0 y estar documentada con Swagger. 
+Alta 
+RNF-
+22 
+Formato JSON La API debe usar JSON como formato de 
+intercambio de datos. 
+Alta 
+RNF-
+23 
+Compatibilidad con sistemas 
+UHO 
+El diseño de la API debe facilitar la futura 
+integración con SIGENU y ASSET. 
+Media 
+ 
+  
+
+=== FOLIO 14 ===
+PortalInfo UHO — Sistema de Gestión de Contenidos para el Portal Cautivo Universidad de Holguín — UHO 
+Documento de Requerimientos — Versión 1.0 — 2025   Página 14 de 24 
+5. FLUJO GENERAL DEL SISTEMA 
+ 
+5.1 Flujo del Usuario en el Portal Cautivo 
+ 
+El siguiente flujo describe la experiencia del usuario final al conectarse a la red WiFi institucional: 
+ 
+Paso Descripción 
+1. Activación de WiFi El usuario activa la conexión WiFi en su dispositivo móvil o laptop. 
+2. Detección por pfSense pfSense detecta que el usuario no está autenticado e intercepta la 
+conexión. 
+3. Redirección automática El navegador abre automáticamente el Portal Cautivo 
+(HTML+Bootstrap+JS). 
+4. Carga del portal (1-2 seg) El portal carga el formulario de login y realiza fetch() a la API para 
+obtener noticias, eventos, avisos, servicios y encuestas activos. 
+5. Visualización de contenidos El usuario puede navegar por las secciones de contenido (Noticias, 
+Eventos, Avisos, Servicios, Encuestas) antes o después de 
+autenticarse. 
+6. Autenticación (Login) El usuario ingresa usuario y contraseña. El portal envía las 
+credenciales a AGA_AUTH. Si son válidas, pfSense concede acceso 
+a Internet. 
+7. Confirmación visual El portal muestra el nombre completo y foto del usuario (datos de 
+AGA_AUTH). El sistema registra el acceso en el log. 
+8. Registro de visualizaciones El portal reporta via API qué secciones e ítems visualizó el usuario 
+(para estadísticas). 
+9. Acceso a Internet El usuario navega libremente hasta que cierra sesión o expira el 
+tiempo de conexión. 
+ 
+5.2 Flujo de Publicación de Contenidos 
+ 
+Paso Actor / Descripción 
+1. Creación del contenido El Gestor de Contenidos inicia sesión en el panel administrativo con 
+sus credenciales UHO (AGA_AUTH). 
+2. Redacción El Gestor crea un nuevo ítem (ej: noticia) completando los campos 
+requeridos dentro de los límites de caracteres configurados. 
+3. Configuración de vigencia El Gestor selecciona el período de visibilidad del contenido (hoy, 3 
+días, semana, mes, siempre o rango). 
+4. Enviar a publicación El Gestor hace clic en 'Publicar'. El sistema valida el contenido y lo 
+marca como 'Pendiente de aprobación'. 
+5. Alerta al Admin El sistema notifica al Admin (campanita + correo) que hay un nuevo 
+contenido pendiente. 
+
+=== FOLIO 15 ===
+PortalInfo UHO — Sistema de Gestión de Contenidos para el Portal Cautivo Universidad de Holguín — UHO 
+Documento de Requerimientos — Versión 1.0 — 2025   Página 15 de 24 
+6. Revisión del Admin El Admin revisa el contenido en la cola de aprobación. 
+7a. Aprobación El Admin aprueba el contenido. El sistema lo activa en el portal 
+cautivo y notifica al Gestor. 
+7b. Rechazo El Admin rechaza con un motivo. El Gestor es notificado y puede 
+corregir y reenviar. 
+8. Publicación activa El contenido aparece en el portal cautivo mediante la API. Se 
+registra en el log. 
+9. Expiración automática Al llegar la fecha de expiración, el sistema oculta automáticamente 
+el contenido y notifica al Gestor. 
+ 
+  
+
+=== FOLIO 16 ===
+PortalInfo UHO — Sistema de Gestión de Contenidos para el Portal Cautivo Universidad de Holguín — UHO 
+Documento de Requerimientos — Versión 1.0 — 2025   Página 16 de 24 
+6. ARQUITECTURA TÉCNICA PROPUESTA 
+ 
+6.1 Stack Tecnológico 
+ 
+Componente Tecnología 
+Backend / API Django + Django REST Framework 
+Frontend Administración React (con Django templates como alternativa) 
+Frontend Portal Cautivo (pfSense) HTML5 + Bootstrap 5 + JavaScript nativo (sin frameworks) 
+Base de Datos PostgreSQL 
+Autenticación AGA_AUTH (auth.uho.edu.cu) – integración via token 
+Servidor Web Nginx + Gunicorn 
+Contenedorización Docker + Docker Compose 
+Control de versiones GitLab UHO / GitHub 
+Documentación API Swagger / OpenAPI 3.0 
+Notificaciones por correo SMTP institucional UHO 
+Cache Redis (opcional, para endpoints de alta demanda) 
+ 
+6.2 Diagrama de Componentes (descripción) 
+ 
+La arquitectura del sistema se organiza en tres capas principales: 
+ 
+• Capa de Presentación: (1) Portal Cautivo HTML en pfSense – consume la API REST. (2) Panel 
+de Administración React – interfaz SPA para gestores y admins. 
+• Capa de Negocio y API: Django con Django REST Framework expone todos los endpoints. 
+Gestiona la lógica de negocio: aprobación de contenidos, control de vigencia, roles y permisos, 
+notificaciones, logs. 
+• Capa de Datos: PostgreSQL almacena todos los datos del sistema. El acceso a datos se 
+realiza exclusivamente a través de Django ORM. 
+• Servicios Externos: AGA_AUTH para autenticación. SMTP para envío de correos. (Futuro) 
+SIGENU y ASSET para integración de datos de usuarios. 
+ 
+6.3 Endpoints Principales de la API 
+ 
+Endpoint Descripción 
+GET /api/config Configuración del portal: secciones habilitadas, límites 
+GET /api/noticias Listado de noticias activas 
+
+=== FOLIO 17 ===
+PortalInfo UHO — Sistema de Gestión de Contenidos para el Portal Cautivo Universidad de Holguín — UHO 
+Documento de Requerimientos — Versión 1.0 — 2025   Página 17 de 24 
+GET /api/eventos Listado de eventos activos 
+GET /api/avisos Listado de avisos activos 
+GET /api/servicios Listado de servicios RedUHO activos 
+GET /api/encuestas Listado de encuestas activas con preguntas 
+POST 
+/api/encuestas/{id}/respuestas 
+Registrar respuestas a una encuesta 
+POST /api/vistas Registrar visualización de contenido 
+GET /api/categorias Todas las categorías activas (incluyendo dinámicas) 
+POST /auth/login Autenticación via AGA_AUTH 
+POST /auth/logout Cierre de sesión 
+GET /api/docs Documentación Swagger/OpenAPI 
+GET /api/admin/estadisticas Estadísticas del portal cautivo (solo admins) 
+GET /api/admin/logs Logs de acceso y auditoría (solo admins) 
+ 
+  
+
+=== FOLIO 18 ===
+PortalInfo UHO — Sistema de Gestión de Contenidos para el Portal Cautivo Universidad de Holguín — UHO 
+Documento de Requerimientos — Versión 1.0 — 2025   Página 18 de 24 
+7. CASOS DE USO PRINCIPALES 
+ 
+CU-01: Conectarse a la red WiFi y ver contenidos 
+Campo Detalle 
+Actor principal Usuario (Estudiante o Trabajador) 
+Precondición El usuario tiene un dispositivo WiFi y credenciales UHO válidas 
+Flujo principal 1. Usuario activa WiFi → 2. pfSense muestra portal → 3. Portal carga 
+contenidos via API → 4. Usuario navega secciones → 5. Usuario 
+introduce credenciales → 6. pfSense autentica via AGA_AUTH → 7. Se 
+registra el acceso → 8. Usuario accede a Internet 
+Flujo alternativo Si la API no responde: el portal muestra solo el formulario de login. La 
+autenticación sigue funcionando. 
+Postcondición El usuario tiene acceso a Internet. El sistema registra el evento de acceso. 
+ 
+CU-02: Gestor crea y publica una noticia 
+Campo Detalle 
+Actor principal Gestor de Contenidos 
+Precondición El gestor tiene cuenta en el sistema con permiso de gestión de Noticias 
+Flujo principal 1. Gestor inicia sesión con credenciales UHO → 2. Navega a Gestión de 
+Noticias → 3. Crea nueva noticia (título, contenido, área, vigencia) → 4. 
+Sistema valida límites de caracteres → 5. Gestor hace clic en 'Publicar' → 
+6. Sistema notifica al Admin → 7. Admin aprueba → 8. Noticia aparece en 
+el portal 
+Flujo alternativo Si se excede el límite de caracteres: el sistema muestra advertencia y no 
+permite guardar. Si se excede la cantidad máxima visible: el sistema 
+alerta pero permite enviar a aprobación. 
+Postcondición La noticia está activa en el portal cautivo y visible para todos los usuarios 
+WiFi. 
+ 
+CU-03: Admin aprueba contenido pendiente 
+Campo Detalle 
+Actor principal Admin 
+Precondición Existe contenido pendiente de aprobación 
+Flujo principal 1. Admin recibe notificación (campanita/correo) → 2. Abre cola de 
+aprobación → 3. Revisa el contenido → 4. Aprueba o rechaza con motivo 
+→ 5. Sistema activa/rechaza el contenido → 6. Sistema notifica al Gestor 
+Postcondición El contenido queda activo (si aprobado) o en estado rechazado (si 
+rechazado). 
+
+=== FOLIO 19 ===
+PortalInfo UHO — Sistema de Gestión de Contenidos para el Portal Cautivo Universidad de Holguín — UHO 
+Documento de Requerimientos — Versión 1.0 — 2025   Página 19 de 24 
+ 
+CU-04: Superadmin crea nueva categoría dinámica 
+Campo Detalle 
+Actor principal Superadmin 
+Precondición El Superadmin ha iniciado sesión 
+Flujo principal 1. Superadmin va a Configuración → Categorías → 2. Crea nueva 
+categoría (nombre, descripción, campos requeridos) → 3. Sistema crea 
+los endpoints de API correspondientes → 4. Superadmin asigna a 
+Gestores la nueva categoría → 5. El portal cautivo detecta la nueva 
+sección via /api/config 
+Postcondición La nueva categoría aparece en el portal cautivo y en el panel de 
+administración. 
+ 
+  
+
+=== FOLIO 20 ===
+PortalInfo UHO — Sistema de Gestión de Contenidos para el Portal Cautivo Universidad de Holguín — UHO 
+Documento de Requerimientos — Versión 1.0 — 2025   Página 20 de 24 
+8. MODELO DE DATOS CONCEPTUAL 
+ 
+A continuación se describen las principales entidades del sistema y sus relaciones: 
+ 
+Entidad Atributos principales 
+Usuario id, correo_uho, uid_aga (desde AGA_AUTH), nombre_completo, 
+tipo_usuario, rol_sistema, activo, fecha_creación 
+Categoría id, nombre, slug, descripción, activo, max_visibles, 
+max_caracteres_titulo, max_caracteres_descripcion, es_dinámica, 
+fecha_creación 
+Contenido (base) id, categoría_id, titulo, descripcion, autor_id, estado 
+(borrador/pendiente/aprobado/rechazado/oculto), vigencia_tipo, 
+fecha_inicio, fecha_fin, activo_manual (switch), fecha_creación, 
+fecha_modificación 
+Noticia (ext. Contenido) link_externo (opcional), área_id 
+Evento (ext. Contenido) área_id, fecha_evento, contacto, link_convocatoria 
+Aviso (ext. Contenido) (solo campos base) 
+Servicio (ext. Contenido) link_acceso, área_id 
+Encuesta (ext. Contenido) tipo (interna/externa), link_externo, preguntas[] 
+Pregunta id, encuesta_id, texto, tipo (simple/multiple/abierta), opciones[] 
+Respuesta id, pregunta_id, usuario_portal (IP/uid), valor, fecha 
+LogAcceso id, uid_usuario, tipo_usuario, ip, user_agent, seccion_vista, item_id, 
+timestamp 
+Notificación id, destinatario_id, tipo, mensaje, leída, fecha 
+Área/Departamento id, nombre, descripción, activo (nomenclador CRUD) 
+AprobacionContenido id, contenido_id, admin_id, estado, motivo_rechazo, fecha 
+ 
+  
+
+=== FOLIO 21 ===
+PortalInfo UHO — Sistema de Gestión de Contenidos para el Portal Cautivo Universidad de Holguín — UHO 
+Documento de Requerimientos — Versión 1.0 — 2025   Página 21 de 24 
+9. RESTRICCIONES Y REGLAS DE NEGOCIO 
+ 
+10. El portal cautivo (HTML en pfSense) NO debe ser modificado para cambios de contenido ni de 
+configuración de secciones. Todos los cambios deben hacerse desde el backend. 
+11. El portal cautivo SOLO puede usar HTML5, Bootstrap 5 y JavaScript nativo. No se permite el 
+uso de frameworks adicionales (React, Vue, Angular) en el frontend de pfSense. 
+12. Los recursos de Bootstrap y JS utilizados en el portal cautivo deben estar embebidos o 
+servidos localmente (sin CDN externo), para garantizar carga en 1-2 segundos incluso sin 
+acceso a Internet. 
+13. El portal cautivo no debe cargar imágenes de contenido, videos ni documentos. Solo texto y 
+links. 
+14. La autenticación administrativa SOLO se permite para usuarios registrados previamente en el 
+sistema, aunque sus credenciales AGA_AUTH sean válidas. 
+15. Todo contenido creado por un Gestor requiere aprobación de un Admin antes de ser publicado 
+en el portal. 
+16. El Superadmin no puede ser eliminado del sistema. 
+17. Los logs de acceso no deben poder eliminarse manualmente (solo por política de retención 
+configurada). 
+18. Las contraseñas de usuarios NO se almacenan en la base de datos local. La autenticación es 
+100% delegada a AGA_AUTH. 
+19. El sistema debe seguir funcionando (portal cautivo y autenticación) aunque la API de 
+contenidos no esté disponible temporalmente. 
+ 
+  
+
+=== FOLIO 22 ===
+PortalInfo UHO — Sistema de Gestión de Contenidos para el Portal Cautivo Universidad de Holguín — UHO 
+Documento de Requerimientos — Versión 1.0 — 2025   Página 22 de 24 
+10. ENTREGABLES DEL PROYECTO 
+ 
+Entregable Descripción 
+Código fuente Repositorio en GitLab UHO o GitHub con histórico de commits, 
+ramas main/develop y tags de versión 
+Docker Compose Archivo docker-compose.yml para despliegue local y en entorno de 
+desarrollo UHO 
+Documentación técnica README, guía de instalación, arquitectura del sistema, 
+configuración de variables de entorno 
+Documentación API Swagger/OpenAPI accesible en /api/docs del servidor desplegado 
+Manual de usuario Guía de uso para Gestores, Admins y Superadmin 
+Script de base de datos Migraciones de Django + datos iniciales (seed) con roles y 
+configuración por defecto 
+HTML del Portal Cautivo Archivo HTML único y optimizado para despliegue en pfSense 
+Mockup interactivo Archivo HTML con mockup interactivo de todas las pantallas del 
+sistema 
+ 
+  
+
+=== FOLIO 23 ===
+PortalInfo UHO — Sistema de Gestión de Contenidos para el Portal Cautivo Universidad de Holguín — UHO 
+Documento de Requerimientos — Versión 1.0 — 2025   Página 23 de 24 
+11. GLOSARIO 
+ 
+Término Definición 
+Portal Cautivo Página web que intercepta el acceso a Internet de un usuario 
+conectado a una red WiFi, requiriéndole autenticación o aceptación 
+de condiciones 
+pfSense Distribución de software de firewall y router basada en FreeBSD, 
+utilizada por la UHO para gestionar el portal cautivo de red 
+AGA_AUTH Sistema de Autenticación Centralizada de la UHO, disponible en 
+auth.uho.edu.cu, que centraliza la gestión de identidades de 
+estudiantes y trabajadores 
+CMS Sistema de Gestión de Contenidos (Content Management System): 
+software que permite crear, gestionar y publicar contenido digital sin 
+necesidad de conocimientos técnicos avanzados 
+API REST Interfaz de Programación de Aplicaciones que sigue el estilo 
+arquitectónico REST, usando HTTP para intercambiar datos en 
+formato JSON 
+Gestor de Contenidos Usuario del sistema administrativo con permisos para crear y 
+publicar contenidos en las categorías asignadas 
+Flujo de aprobación Proceso por el cual un contenido creado por un Gestor debe ser 
+revisado y aprobado por un Admin antes de publicarse en el portal 
+Nomenclador Catálogo de valores fijos utilizados como referencia en el sistema 
+(áreas, departamentos, tipos, etc.) que pueden gestionarse 
+mediante CRUD 
+Switch de visibilidad Control de activación/desactivación rápida de un contenido, 
+independientemente de su fecha de vigencia configurada 
+Vigencia temporal Período de tiempo durante el cual un contenido está activo y visible 
+en el portal cautivo 
+Log estructurado Registro de eventos del sistema en formato estructurado (JSON) 
+que incluye: quién, qué, cuándo, desde dónde 
+mobile-first Enfoque de diseño que prioriza la experiencia en dispositivos 
+móviles antes que en pantallas de escritorio 
+WCAG 2.1 AA Web Content Accessibility Guidelines: estándar internacional de 
+accesibilidad web, nivel AA 
+SIGENU Sistema Integral de Gestión de la Educación Superior: base de 
+datos de estudiantes de la UHO 
+ASSET Sistema de gestión de activos y trabajadores de la UHO 
+ 
+  
+
+=== FOLIO 24 ===
+PortalInfo UHO — Sistema de Gestión de Contenidos para el Portal Cautivo Universidad de Holguín — UHO 
+Documento de Requerimientos — Versión 1.0 — 2025   Página 24 de 24 
+12. REFERENCIAS 
+ 
+20. AGA_AUTH – Sistema de Autenticación Centralizada UHO: https://auth.uho.edu.cu/ 
+21. pfSense Documentation: https://docs.netgate.com/pfsense/en/latest/ 
+22. Django REST Framework: https://www.django-rest-framework.org/ 
+23. OpenAPI Specification 3.0: https://spec.openapis.org/oas/v3.0.0 
+24. Bootstrap 5 Documentation: https://getbootstrap.com/docs/5.0/ 
+25. WCAG 2.1 Accessibility Guidelines: https://www.w3.org/TR/WCAG21/ 
+26. Manual de Identidad Visual UHO – Disponible en la Dirección de Comunicación Institucional 
+27. Regulaciones de Protección de Datos Personales vigentes en Cuba 
+ 
