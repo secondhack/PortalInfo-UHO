@@ -434,9 +434,137 @@ Grupos funcionales principales:
 
 La API devuelve JSON. Las rutas, parámetros, esquemas, permisos y respuestas de error están descritos en OpenAPI y en `docs/arquitectura/CONTRATOS.md`.
 
+
 ## 🛡️ Seguridad y privacidad
 
 La demostración incorpora controles de aplicación, pero no equivale a una instalación institucional:
 
 - Contraseñas ficticias CMS/visitante almacenadas con hash de Django.
-- 
+- Sesiones persistidas en PostgreSQL, rotación al autenticar y cierre de sesión en servidor.
+- Cookies HttpOnly y protección CSRF.
+- Validación y autorización en el backend, no solo en la interfaz.
+- Bloqueo de intentos y límites de solicitudes.
+- Respuestas privadas con política `no-store`.
+- Auditoría sin registrar contraseñas ni tokens.
+- Identidades visitantes independientes de usuarios y roles CMS.
+- Configuración de producción que rechaza DEBUG y proveedores demo.
+
+**Protección de archivos y datos**
+- No compartas `.env`, `.local/`, credenciales ni respaldos.
+- No publiques cuentas ficticias ni capturas que muestren información de acceso.
+- No copies datos institucionales reales al entorno de pruebas.
+- Mantén el repositorio privado cuando contenga datos de revisión o configuración no pública.
+
+## 🧪 Pruebas y estado de verificación
+
+La última entrega documentada registra:
+
+| Suite | Resultado |
+|---|---:|
+| Django/PostgreSQL | 118 aprobadas |
+| React/Vitest | 26 aprobadas |
+| Portal/DOM | 17 aprobadas |
+| Playwright/Chrome | 12 aprobadas |
+| **Total** | **173 aprobadas, 0 fallidas y 0 omitidas** |
+
+Además, `scripts/smoke_final_http.py` completó 29 comprobaciones HTTP reales, informadas aparte y no sumadas al total de tests.
+
+Otras verificaciones de la entrega:
+- Compilación de React correcta.
+- OpenAPI validado sin avisos/errores de generación.
+- Dependencias Python y Node verificadas.
+- 36 migraciones aplicadas; la entrega final no requirió migraciones nuevas.
+- Portal final de 24 539 bytes sin gzip, por debajo del límite documentado de 204 800 bytes.
+- La suite y las mediciones detalladas se encuentran en `docs/pruebas/RESULTADOS.md`.
+
+**Límites de las pruebas:** las mediciones locales no certifican carga institucional sostenida. La concurrencia de 200 conexiones permanece parcial; la ráfaga API está limitada por cuota y debe interpretarse según el informe. Tampoco se acredita aceptación física en Android/iOS/WebViews ni certificación WCAG completa.
+
+## 📚 Documentación adicional
+
+| Documento | Contenido |
+|---|---|
+| `docs/manuales/INSTALACION.md` | Preparación en un equipo Windows nuevo |
+| `docs/manuales/COMO_PROBAR_EN_VSCODE.md` | Guía detallada de demostración en VS Code |
+| `docs/manuales/USO.md` | Operación general del sistema |
+| `docs/manuales/SUPERADMIN.md` | Funciones del Superadmin |
+| `docs/manuales/ADMIN.md` | Funciones del Admin |
+| `docs/manuales/GESTOR.md` | Gestión de contenidos |
+| `docs/manuales/PORTAL_CAUTIVO.md` | Portal, sesión visitante y API |
+| `docs/manuales/MANTENIMIENTO.md` | Respaldo, restauración y mantenimiento |
+| `docs/manuales/DESPLIEGUE_ORIENTATIVO.md` | Notas orientativas para despliegue futuro |
+| `docs/arquitectura/ARQUITECTURA.md` | Decisiones y arquitectura técnica |
+| `docs/arquitectura/MODELO_DATOS.md` | Entidades, relaciones y restricciones |
+| `docs/arquitectura/PERMISOS.md` | Matriz de permisos y fronteras de confianza |
+| `docs/arquitectura/CONTRATOS.md` | Contratos REST |
+| `docs/arquitectura/openapi.yaml` | Esquema OpenAPI |
+| `docs/arquitectura/TRAZABILIDAD.md` | Requisitos, estado, evidencia y limitaciones |
+| `docs/arquitectura/ENTREGA_FINAL.md` | Informe final de la entrega local |
+| `docs/arquitectura/TODO.md` | Pendientes y dependencias |
+| `docs/pruebas/RESULTADOS.md` | Evidencias e historial de pruebas |
+
+## ⚠️ Limitaciones y trabajo pendiente
+
+La versión actual es funcional para demostración local, no un despliegue institucional. Permanecen pendientes o sin aceptación institucional:
+
+1. **AGA_AUTH:** autenticación institucional real, sujeta a contrato y entorno autorizados.
+2. **pfSense:** conexión con el sistema de red y autorización de acceso, sin cambios automáticos en la demostración.
+3. **SMTP:** envío mediante correo institucional; actualmente el modo de demostración escribe mensajes localmente.
+4. **SIGENU y ASSET:** integración y sincronización real de datos.
+5. **Producción:** validación de TLS, Docker, Linux, Nginx/Gunicorn, caché compartida y recuperación real desde respaldo.
+6. **Rendimiento:** aceptación de carga sostenida y concurrencia en la infraestructura universitaria.
+7. **Accesibilidad e identidad visual:** pruebas exhaustivas WCAG y revisión formal contra el Manual de Identidad de la UHO.
+8. **Dispositivos físicos:** verificación en teléfonos/tabletas Android e iOS y WebViews.
+9. **Repositorio institucional:** el requisito de publicación/pipeline remoto permanece pendiente según el alcance decidido para esta entrega.
+
+Los archivos Docker y configuraciones Nginx existentes se consideran material técnico orientativo; no significan que el despliegue de producción haya sido ejecutado o validado.
+
+## 🔧 Mantenimiento y solución de problemas
+
+| Situación | Acción recomendada |
+|---|---|
+| PostgreSQL no responde | Comprueba estado del clúster del proyecto y parámetros locales del `.env`; no recrees una base existente |
+| Falta `.venv` o una dependencia | Sigue `docs/manuales/INSTALACION.md` |
+| Puerto 8010 ocupado | Comprueba qué proceso pertenece al proyecto; no detengas servicios de otras aplicaciones |
+| Puerto 5174 ocupado | Comprueba otra instancia Vite del proyecto |
+| Error CSRF o sesión vencida | Usa `127.0.0.1` consistentemente, recarga e inicia sesión otra vez |
+| Usuario sin permisos | Comprueba rol, categoría asignada y concesión de la operación |
+| Contenido no visible | Comprueba aprobación, vigencia, switch, categoría y límite de publicaciones |
+| Error 429 | Respeta el tiempo de bloqueo/cuota; no desactives las protecciones |
+
+Para respaldos y restauración utiliza los procedimientos de `docs/manuales/MANTENIMIENTO.md`. La herramienta de restauración está diseñada para rechazar destinos existentes; no ejecutes restauraciones sobre la base de trabajo.
+
+## 🤝 Contribución
+
+Para preparar cambios de código o documentación:
+
+1. Revisa primero la arquitectura y los manuales relacionados.
+2. Mantén las reglas de autorización en el backend.
+3. No elimines migraciones ni reinicies bases con datos.
+4. Añade o actualiza pruebas para los cambios funcionales.
+5. Actualiza OpenAPI y la documentación cuando cambien los contratos.
+6. No introduzcas credenciales, datos reales ni archivos privados en commits.
+
+Los cambios de infraestructura institucional requieren revisión y autorización de los responsables correspondientes.
+
+## 📄 Licencia
+
+No se declara una licencia de código abierto en este README porque no se ha confirmado una licencia aplicable al repositorio. Consulta con los responsables del proyecto antes de reutilizar o redistribuir el código.
+
+---
+
+**PortalInfo UHO — Universidad de Holguín**
+
+Proyecto de demostración local para la gestión y publicación de contenidos del portal cautivo.
+
+
+
+
+
+
+
+
+
+
+
+
+ 
