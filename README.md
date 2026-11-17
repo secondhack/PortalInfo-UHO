@@ -1,80 +1,442 @@
-# PortalInfo UHO · Entrega local
+# 🏛️ PortalInfo UHO
+## Portal cautivo y sistema de gestión de contenidos de la Universidad de Holguín
 
-Aplicación para demostrar en una tesis la gestión de contenidos del Portal Cautivo de la Universidad de Holguín. Django/DRF y PostgreSQL implementan negocio, seguridad y persistencia; React administra; el portal HTML5/JavaScript nativo consume contenidos, votos y vistas reales. Las identidades y la autorización de red son exclusivamente DEMO.
+**PortalInfo UHO** es una aplicación web para la administración de contenidos y la presentación de información institucional mediante un portal cautivo. La solución organiza la gestión editorial, la publicación de noticias, eventos, avisos, servicios y encuestas, y ofrece un portal público/visitante conectado a una API propia.
 
-**Todo permanece local. No se publica en GitHub/GitLab ni se conectan cuentas externas.** No se contactan AGA_AUTH, pfSense, SMTP institucional, SIGENU o ASSET ni se concede acceso a Internet.
+El proyecto está implementado como una demostración funcional local para Windows y Visual Studio Code. Su núcleo utiliza **Django REST Framework y PostgreSQL**, el panel administrativo está desarrollado con **React y Vite**, y el portal cautivo utiliza **HTML5, CSS y JavaScript nativo**.
 
-**Excepción de revisión:** hay una copia en un repositorio **privado** de GitHub, compartida solo con el tutor. No cambiarla a pública. El `.env` y las cuentas demo siguen siendo locales y ficticias; no van en capturas ni en la memoria. Cómo levantarlo en otro equipo: [PARA_EL_TUTOR.md](PARA_EL_TUTOR.md).
+> **Alcance de la entrega:** esta versión funciona en entorno local con identidades ficticias. No autentica usuarios con AGA_AUTH, no modifica pfSense ni concede acceso a Internet. Las integraciones AGA_AUTH, pfSense, SMTP institucional, SIGENU y ASSET requieren contratos y validación de la Universidad. No utilizar credenciales institucionales reales.
 
-## Empezar desde VS Code
+---
 
-Abre esta carpeta en VS Code y sigue [la guía paso a paso](docs/manuales/COMO_PROBAR_EN_VSCODE.md). En este equipo .env, .venv, PostgreSQL y las cuentas ficticias ya están preparados. No repitas bootstrap ni recrees la base.
+## 📌 Tabla de contenidos
 
-Desde la raíz, primero comprueba:
+1. [Descripción general](#-descripción-general)
+2. [Objetivos](#-objetivos)
+3. [Características principales](#-características-principales)
+4. [Módulos funcionales](#-módulos-funcionales)
+5. [Arquitectura del sistema](#-arquitectura-del-sistema)
+6. [Stack tecnológico](#-stack-tecnológico)
+7. [Roles y control de acceso](#-roles-y-control-de-acceso)
+8. [Flujos de trabajo](#-flujos-de-trabajo)
+9. [Estructura del repositorio](#-estructura-del-repositorio)
+10. [Requisitos previos](#-requisitos-previos)
+11. [Instalación en Windows](#-instalación-en-windows)
+12. [Ejecución desde Visual Studio Code](#-ejecución-desde-visual-studio-code)
+13. [Direcciones locales](#-direcciones-locales)
+14. [Cuentas de demostración](#-cuentas-de-demostración)
+15. [API REST y documentación](#-api-rest-y-documentación)
+16. [Seguridad y privacidad](#-seguridad-y-privacidad)
+17. [Pruebas y estado de verificación](#-pruebas-y-estado-de-verificación)
+18. [Documentación adicional](#-documentación-adicional)
+19. [Limitaciones y trabajo pendiente](#-limitaciones-y-trabajo-pendiente)
+20. [Mantenimiento y solución de problemas](#-mantenimiento-y-solución-de-problemas)
+21. [Contribución](#-contribución)
+22. [Licencia](#-licencia)
+
+---
+
+## 📝 Descripción general
+
+PortalInfo UHO separa la gestión interna del contenido de la experiencia de consulta del portal cautivo. Los administradores trabajan desde un panel React; el backend Django aplica las reglas de negocio, la autorización y la persistencia; el portal liviano consulta los contenidos publicados mediante endpoints públicos.
+
+La aplicación permite crear y administrar categorías, gestionar contenidos y sus revisiones, aprobar publicaciones, administrar encuestas, registrar interacciones, consultar indicadores y generar reportes. Los datos editoriales, las respuestas y las métricas se almacenan en PostgreSQL.
+
+La autenticación disponible para la demostración utiliza cuentas ficticias separadas para el panel CMS y para el portal. Los adaptadores de identidad institucional existen como frontera de integración, pero el proveedor institucional no está conectado.
+
+## 🎯 Objetivos
+
+- Centralizar la administración de información que se presenta en el portal cautivo.
+- Separar el panel de gestión de la interfaz liviana de consulta.
+- Permitir la administración de noticias, eventos, avisos, servicios y encuestas.
+- Controlar las operaciones por rol, categoría y permiso.
+- Mantener revisiones y versiones aprobadas de los contenidos.
+- Proporcionar estadísticas, auditoría y exportaciones para la gestión.
+- Mantener una base técnica preparada para futuras integraciones institucionales, sin simular que ya están conectadas.
+
+## 🚀 Características principales
+
+- Panel administrativo SPA con React y Vite.
+- API REST implementada con Django REST Framework.
+- Persistencia PostgreSQL y migraciones incrementales.
+- Roles Superadmin, Admin y Gestor.
+- Permisos configurables por usuario/rol, categoría y operación.
+- Gestión de categorías dinámicas y nomencladores jerárquicos.
+- CMS para noticias, eventos, avisos, servicios, encuestas y contenido genérico.
+- Flujo editorial de borrador, envío, aprobación/rechazo e historial de versiones.
+- Portal HTML5/CSS/JavaScript nativo, sin React ni CDN en el artefacto final.
+- Acceso visitante de demostración separado del acceso CMS.
+- Estadísticas, logs de acceso, vistas, alertas defensivas y auditoría.
+- Notificaciones internas y almacenamiento local de correos de demostración.
+- Exportación de reportes en CSV y PDF.
+- Documentación de API mediante OpenAPI 3.0.3 y Swagger UI.
+- Scripts PowerShell para comprobación, arranque y pruebas en Windows.
+
+## 🧩 Módulos funcionales
+
+| Módulo | Responsabilidad |
+|---|---|
+| Cuentas y autenticación | Usuarios, roles, sesiones, proveedores de identidad y bloqueo de intentos |
+| Permisos | Concesiones por usuario o rol, categoría y operación |
+| Catálogos | Tipos de catálogo, valores jerárquicos y categorías dinámicas |
+| Configuración | Preferencias generales, límites, duración de sesión y parámetros de seguridad |
+| Gestión de contenidos | CRUD, validación, estados editoriales, visibilidad y vigencia |
+| Aprobaciones | Cola, comparación de revisiones, aprobación y rechazo motivado |
+| Encuestas | Preguntas, opciones, respuestas, deduplicación y resultados |
+| Portal visitante | Sesión visitante independiente, navegación y consumo de información pública |
+| Analítica | Estadísticas por período, vistas, registros de acceso y métricas |
+| Seguridad y auditoría | Eventos de seguridad, señales para revisión y trazabilidad |
+| Notificaciones | Bandeja, contador, lectura y salida local de correo |
+| Reportes | Exportación CSV/PDF con filtros y controles de acceso |
+
+## 🏗️ Arquitectura del sistema
+
+La aplicación se organiza en tres componentes funcionales, conectados a través del backend.
+
+### Diagrama de arquitectura
+
+```mermaid
+flowchart TB
+    subgraph CLIENTE["Capa de presentación"]
+        R["Panel administrativo<br/>React + Vite"]
+        H["Portal cautivo<br/>HTML5 + CSS + JavaScript"]
+    end
+
+    subgraph SERVIDOR["Capa de aplicación"]
+        D["Django + Django REST Framework"]
+        AUTH["Sesiones, CSRF y permisos"]
+        CMS["CMS, aprobaciones y encuestas"]
+        ANALYTICS["Analítica, auditoría y reportes"]
+        PROVIDER["Adaptadores de identidad"]
+    end
+
+    subgraph DATOS["Capa de persistencia"]
+        DB[("PostgreSQL")]
+        MAIL["Archivos locales de correo demo"]
+    end
+
+    R -->|"HTTP / JSON / sesión"| D
+    H -->|"API pública / sesión visitante"| D
+    D --> AUTH
+    D --> CMS
+    D --> ANALYTICS
+    D --> PROVIDER
+    AUTH --> DB
+    CMS --> DB
+    ANALYTICS --> DB
+    D --> MAIL
+    PROVIDER -.->|"Integración pendiente"| AGA["AGA_AUTH institucional"]
+    H -.->|"Adaptador futuro"| PFS["pfSense"]
+```
+
+### Descripción de las capas
+
+**Presentación**
+- **Panel administrativo:** aplicación React/Vite. Proporciona login, navegación por módulos, tablas, formularios, estadísticas, aprobaciones y reportes.
+- **Portal cautivo:** documento HTML autónomo con CSS y JavaScript nativo. Obtiene configuración, categorías y publicaciones desde la API. Django sirve la ruta local `/portal/`.
+
+**Aplicación**
+- Django concentra validación de entradas, autenticación de demostración, control de permisos, lógica editorial, encuestas y API.
+- Django REST Framework implementa los endpoints REST.
+- Los servicios de contenido y aprobación mantienen separada la revisión de trabajo de la última versión pública aprobada.
+- Los módulos de analítica y auditoría registran interacciones y generan información para el panel.
+
+**Persistencia**
+- PostgreSQL guarda usuarios CMS, roles, permisos, catálogos, categorías, contenidos, publicaciones, aprobaciones, respuestas, notificaciones, registros y configuración.
+- Los correos de prueba se escriben en el directorio local `.local/mail` cuando se habilita esa preferencia. No se contacta SMTP institucional.
+
+### Tecnologías y comunicación
+
+El panel y el portal se comunican con Django mediante HTTP y JSON, con sesiones y protección CSRF. La API y la documentación OpenAPI se publican localmente en el backend. PostgreSQL se utiliza tanto para los datos funcionales como para las sesiones del entorno de demostración.
+
+## 🛠️ Stack tecnológico
+
+| Área | Tecnología | Uso |
+|---|---|---|
+| Lenguaje backend | Python 3.11+ | Lógica del servidor |
+| Framework backend | Django 5.2 | Aplicación web y ORM |
+| API | Django REST Framework 3.18 | Servicios REST |
+| Base de datos | PostgreSQL 16 | Persistencia |
+| Driver DB | psycopg 3 | Conexión PostgreSQL |
+| Frontend administrativo | React 19 | Interfaz SPA |
+| Herramienta frontend | Vite 7 | Desarrollo y compilación |
+| Enrutamiento | React Router 7 | Navegación del panel |
+| Gráficos | Chart.js 4 | Visualización de métricas |
+| Servidor local Windows | Waitress 3 | Servir Django en la demostración |
+| Documentación API | drf-spectacular / OpenAPI 3.0.3 | Esquema y Swagger |
+| Reportes PDF | ReportLab | Generación PDF |
+| Pruebas frontend | Vitest / Testing Library | Pruebas de componentes |
+| Pruebas de navegador | Playwright | Pruebas locales con Chrome |
+| Portal cautivo | HTML5, CSS y JavaScript nativo | Interfaz independiente y liviana |
+
+Las versiones exactas verificadas se encuentran en `backend/requirements.lock.txt` y `frontend/package-lock.json`.
+
+## 🔐 Roles y control de acceso
+
+El sistema implementa tres roles administrativos. Las capacidades administrativas reservadas se mantienen como fronteras de seguridad; las operaciones editoriales se complementan con concesiones específicas.
+
+| Rol | Descripción | Permisos principales |
+|---|---|---|
+| **SUPERADMIN** | Responsable de la administración global | Gestionar usuarios y roles, asignar permisos, crear/eliminar categorías, configurar seguridad, consultar auditoría y administrar contenidos |
+| **ADMIN** | Administrador funcional | Administrar Gestores, configurar visibilidad/límites y nomencladores, gestionar contenidos y aprobar/rechazar publicaciones |
+| **GESTOR** | Responsable de contenidos | Crear y editar contenidos en categorías asignadas, consultar y enviar revisiones para aprobación |
+
+Las concesiones editoriales se definen por sujeto (usuario o rol), categoría y operación: `view`, `create`, `edit`, `delete` y `submit`. El backend verifica los permisos; ocultar un botón en React no sustituye la autorización del servidor.
+
+El portal visitante utiliza una identidad/sesión distinta de la cuenta CMS. Una cuenta visitante no obtiene permisos administrativos ni concede conectividad a Internet.
+
+## 🔄 Flujos de trabajo
+
+### Publicación de una noticia
+
+1. Un Gestor con categoría y permisos asignados crea una noticia.
+2. Guarda la noticia como borrador.
+3. Envía la revisión a aprobación.
+4. Un Admin o Superadmin revisa la propuesta y la aprueba o rechaza. El rechazo requiere motivo.
+5. Al aprobarse, se publica la versión aprobada si también cumple visibilidad, vigencia y límites de categoría.
+6. El portal consulta la publicación desde la API.
+
+Una edición posterior del Gestor vuelve a generar una revisión. La versión pública anterior permanece visible hasta que se apruebe la nueva. El Gestor no puede aprobar su propio contenido.
+
+### Encuestas
+
+1. El Gestor crea una encuesta y define preguntas/opciones dentro de los límites configurados.
+2. Envía la encuesta para aprobación.
+3. Un Admin o Superadmin la aprueba.
+4. Un visitante o usuario autorizado responde, según la política de autenticación de esa encuesta.
+5. Django valida estado, versión, opciones, obligatoriedad y duplicación.
+6. El panel consulta resultados y puede exportarlos a CSV o PDF.
+
+### Notificaciones y reportes
+
+El sistema registra notificaciones para eventos editoriales relevantes. La bandeja permite consultar y marcar mensajes como leídos. El correo de demostración se almacena localmente. Los módulos de estadísticas y reportes filtran datos por período y permisos.
+
+## 📂 Estructura del repositorio
+
+Estructura funcional resumida del repositorio:
+
+```text
+PortalInfo-UHO/
+├── README.md
+├── PARA_EL_TUTOR.md
+├── .env.example
+├── backend/
+│   ├── config/
+│   │   ├── settings.py
+│   │   ├── urls.py
+│   │   └── wsgi.py
+│   ├── apps/
+│   │   ├── accounts/        # Usuarios, roles, permisos y proveedores
+│   │   ├── approvals/       # Cola y decisiones editoriales
+│   │   ├── audit/           # Eventos y contexto de auditoría
+│   │   ├── analytics/       # Métricas, logs, alertas y reportes
+│   │   ├── catalogs/        # Catálogos y categorías
+│   │   ├── content/         # Contenido, versiones y encuestas
+│   │   ├── notifications/   # Bandeja y correo local
+│   │   ├── portal/          # Identidad y sesión visitante
+│   │   └── settings_app/    # Configuración persistente
+│   ├── manage.py
+│   ├── requirements.txt
+│   ├── requirements-dev.txt
+│   ├── requirements.lock.txt
+│   └── requirements-production.txt
+├── frontend/
+│   ├── src/
+│   │   ├── api/
+│   │   ├── components/
+│   │   ├── contexts/
+│   │   ├── layouts/
+│   │   ├── pages/
+│   │   ├── routes/
+│   │   └── styles/
+│   ├── package.json
+│   └── vite.config.js
+├── captive-portal/
+│   ├── src/                 # HTML, CSS y JavaScript fuente
+│   ├── dist/                # HTML autónomo compilado
+│   ├── tests/
+│   └── build.mjs
+├── scripts/
+│   ├── iniciar_backend.ps1
+│   ├── iniciar_frontend.ps1
+│   ├── iniciar_portal.ps1
+│   ├── verificar_entorno.ps1
+│   ├── probar_sistema.ps1
+│   ├── serve_backend.py
+│   ├── smoke_final_http.py
+│   └── respaldar_base.py
+└── docs/
+    ├── arquitectura/
+    ├── manuales/
+    ├── pruebas/
+    └── requisitos/
+```
+
+Los directorios `.env` y `.local/` contienen configuración/estado privado del entorno. No deben incorporarse a capturas públicas ni compartirse como código fuente.
+
+## 💻 Requisitos previos
+
+Para instalar en un equipo Windows nuevo:
+
+- Windows 10/11.
+- Python 3.11 o superior.
+- Node.js 22.12 o superior.
+- PostgreSQL 16 y herramientas `pg_dump` / `pg_restore`.
+- Git.
+- Visual Studio Code (recomendado).
+
+La demostración validada se ejecuta sin Docker. No se requiere instalar un servidor independiente para el portal cautivo: Django sirve esa ruta.
+
+## 📦 Instalación en Windows
+
+### 1. Obtener el código
+
+Clona el repositorio desde una terminal donde Git tenga acceso autorizado:
+
+```powershell
+git clone https://github.com/secondhack/PortalInfo-UHO.git
+cd PortalInfo-UHO
+code .
+```
+
+Si ya tienes el repositorio local, abre la carpeta `PortalInfo-UHO` con **Archivo → Abrir carpeta** en VS Code.
+
+### 2. Crear el entorno Python
+
+Desde la raíz del proyecto:
+
+```powershell
+python -m venv .venv
+.\.venv\Scripts\python.exe -m pip install -r backend\requirements-dev.txt
+```
+
+### 3. Instalar dependencias del frontend
+
+```powershell
+npm.cmd --prefix frontend ci --no-audit --no-fund
+```
+
+### 4. Configurar el entorno
+
+Si todavía no existe `.env`, copia `.env.example` a `.env` y sustituye las claves y credenciales de ejemplo por valores aleatorios propios. No sobrescribas un `.env` válido. No compartas su contenido.
+
+La demostración local utiliza proveedor de identidad demo, sesión visitante demo y correo en modo archivo. La configuración de producción rechaza el proveedor demo y DEBUG.
+
+### 5. Preparar PostgreSQL en una instalación nueva
+
+Solo para una instalación completamente nueva, con PostgreSQL 16 disponible y sin una base de trabajo existente:
+
+```powershell
+.\scripts\start-database.cmd
+.\.venv\Scripts\python.exe scripts\create_database.py
+.\.venv\Scripts\python.exe backend\manage.py migrate
+.\.venv\Scripts\python.exe backend\manage.py seed_demo
+.\.venv\Scripts\python.exe backend\manage.py seed_portal_demo
+node captive-portal/build.mjs
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts\verificar_entorno.ps1
+```
+
+No ejecutes estos pasos de bootstrap sobre la instalación que ya contiene datos: consulta primero `docs/manuales/INSTALACION.md`. No uses `flush`, no borres migraciones y no reemplaces PostgreSQL por SQLite.
+
+## ▶️ Ejecución desde Visual Studio Code
+
+Abre la carpeta raíz del proyecto en Visual Studio Code. Usa tres terminales integradas independientes. No es necesario ejecutar VS Code como administrador.
+
+Primero comprueba el entorno:
 
 ```powershell
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts\verificar_entorno.ps1
 ```
 
-Terminal 1:
+**Terminal 1 — Backend Django/Waitress**
 
 ```powershell
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts\iniciar_backend.ps1
 ```
 
-Terminal 2:
+**Terminal 2 — Panel administrativo React/Vite**
 
 ```powershell
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts\iniciar_frontend.ps1
 ```
 
-Terminal 3:
+**Terminal 3 — Compilar y verificar el portal**
 
 ```powershell
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts\iniciar_portal.ps1
 ```
 
-El portal lo sirve Django: no se inicia un tercer servidor. Bypass afecta solo al proceso, no cambia políticas globales. Los scripts no necesitan privilegios de administrador. Alternativas directas: `.venv\Scripts\python.exe -u scripts\serve_backend.py`, `npm.cmd --prefix frontend run dev` y abrir /portal/. Detener los dos servidores con Ctrl+C.
+El tercer script comprueba el artefacto y que Django ya sirve el portal; **no inicia un tercer servidor**. Deja abiertas las terminales de Backend y Administración mientras utilizas el sistema.
 
-| Interfaz | Dirección |
-|---|---|
-| Administración React | http://127.0.0.1:5174 |
-| Portal cautivo | http://127.0.0.1:8010/portal/ |
-| Estado de Django/PostgreSQL | http://127.0.0.1:8010/api/health/ |
-| Swagger local | http://127.0.0.1:8010/api/docs/ |
-
-PostgreSQL del proyecto usa 127.0.0.1:55432 y .local/postgres. Se conservan servicios ajenos 8000/5173/5432. Si el clúster del proyecto está detenido: scripts\start-database.cmd; no reiniciar una instancia activa.
-
-## Cuentas ficticias y datos
-
-Credenciales CMS: .local/demo-credentials.txt (Superadmin/Admin/Gestor). Visitantes: .local/portal-demo-credentials.txt. No imprimir, publicar ni mostrar esos archivos o .env en capturas. Para instalación nueva: `backend/manage.py seed_demo` y `seed_portal_demo`, mediante el Python de .venv. Las semillas conservan cuentas/contraseñas existentes.
-
-El Gestor necesita categoría asignada y concesión por operación. Guarda borrador, envía, el Admin recibe notificación y aprueba; la API/portal muestran la publicación. Editar como Gestor conserva la versión pública anterior hasta nueva aprobación. Encuestas, gráficos, resultados y CSV/PDF utilizan datos de PostgreSQL. Correo demo se guarda en .local/mail cuando se activa esa preferencia.
-
-## Verificar la entrega
+Alternativas directas:
 
 ```powershell
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts\probar_sistema.ps1
-# Con backend iniciado: usuario nuevo, dos aprobaciones, encuesta y doce exportaciones
-.\.venv\Scripts\python.exe scripts\smoke_final_http.py
-# Carga solo local: tasa/duración/conexiones acotadas; no desactiva cuotas
-.\.venv\Scripts\python.exe scripts\medir_rendimiento_final.py --connections 200 --rate 5 --seconds 5
-# Respaldo nuevo y catálogo validado, sin sobrescritura
-.\.venv\Scripts\python.exe scripts\respaldar_base.py
+.\.venv\Scripts\python.exe -u scripts\serve_backend.py
+npm.cmd --prefix frontend run dev
 ```
 
-Resultado final: **173 pruebas aprobadas, 0 fallidas** (118 backend, 26 React, 17 portal/DOM y 12 navegador). Las suites funcionales y la carga se informan separadamente en [RESULTADOS.md](docs/pruebas/RESULTADOS.md). El script conserva test_portalinfo reutilizable con --keepdb; los tests necesitan CREATEDB de desarrollo y no reinician PostgreSQL. El smoke crea datos propios, los retira lógicamente/desactiva y conserva historial; no edita contenido ajeno. El comprobador de secretos compara valores locales sin mostrarlos.
+Para detener la demostración, pulsa **Ctrl+C** en las terminales de React y Django. PostgreSQL puede permanecer activo. No detengas procesos de otros proyectos.
 
-Portal final: captive-portal/dist/index.html, **24539 bytes sin gzip**, límite 204800. `node captive-portal/build.mjs` compila CSS/JS inline; `scripts/check_portal_size.py` verifica independientemente. Estilos propios compatibles con subconjunto Bootstrap 5, sin distribución completa ni JS de Bootstrap. Sin React/CDN/fuentes externas/imágenes/videos/adjuntos en el portal.
+## 🌐 Direcciones locales
 
-Waitress local: ocho hilos, cola/conexiones acotadas; PostgreSQL reutiliza conexiones hasta 60 s con comprobación de salud, configurable DATABASE_CONN_MAX_AGE. La ráfaga HTML de 200 respondió correctamente; la API conserva 429 al exceder 120/min/IP. Las medidas loopback no certifican WiFi, carga móvil de 1–2 s ni rendimiento institucional. Se conservan resultados negativos previos de runserver.
+| Servicio | Dirección |
+|---|---|
+| Panel administrativo React | http://127.0.0.1:5174 |
+| Portal cautivo | http://127.0.0.1:8010/portal/ |
+| Estado de backend y PostgreSQL | http://127.0.0.1:8010/api/health/ |
+| Swagger UI | http://127.0.0.1:8010/api/docs/ |
+| Esquema OpenAPI | http://127.0.0.1:8010/api/schema/ |
 
-## Documentación
+PostgreSQL del proyecto utiliza el puerto local **55432**. Los puertos ajenos 8000, 5173 y 5432 se conservan para no interferir con otras aplicaciones.
 
-- [Instalación nueva](docs/manuales/INSTALACION.md), [guía VS Code](docs/manuales/COMO_PROBAR_EN_VSCODE.md) y [uso](docs/manuales/USO.md).
-- [Superadmin](docs/manuales/SUPERADMIN.md), [Admin](docs/manuales/ADMIN.md), [Gestor](docs/manuales/GESTOR.md) y [Portal cautivo](docs/manuales/PORTAL_CAUTIVO.md).
-- [Mantenimiento/respaldo/restauración segura](docs/manuales/MANTENIMIENTO.md) y [despliegue orientativo](docs/manuales/DESPLIEGUE_ORIENTATIVO.md).
-- [Entrega final](docs/arquitectura/ENTREGA_FINAL.md), [arquitectura](docs/arquitectura/ARQUITECTURA.md), [modelo](docs/arquitectura/MODELO_DATOS.md), [permisos](docs/arquitectura/PERMISOS.md) y [contratos API](docs/arquitectura/CONTRATOS.md).
-- [Trazabilidad de 84 requisitos originales](docs/arquitectura/TRAZABILIDAD.md), [auditoría](docs/pruebas/AUDITORIA_FINAL.md), [resultados](docs/pruebas/RESULTADOS.md) y [pendientes](docs/arquitectura/TODO.md).
+No abras el portal mediante `file://`: las sesiones, cookies y protección CSRF necesitan acceder a través del servidor local.
 
-Docker Compose y Nginx/Gunicorn se conservan como material técnico orientativo; no se usa Docker en la demostración ni se acredita despliegue real. Integraciones institucionales, TLS/restore real y aceptación de dispositivos/identidad visual requieren validación autorizada. RNF-16 queda pendiente por decisión del usuario, sin repositorio remoto ni pipeline.
+## 👥 Cuentas de demostración
+
+Las credenciales ficticias se guardan localmente en:
+
+- `.local/demo-credentials.txt`: cuentas Superadmin, Admin y Gestor del CMS.
+- `.local/portal-demo-credentials.txt`: cuentas visitantes del portal.
+
+No publiques esos archivos, no los incluyas en capturas y no utilices contraseñas reales de la UHO.
+
+En una instalación nueva se pueden crear las semillas con:
+
+```powershell
+.\.venv\Scripts\python.exe backend\manage.py seed_demo
+.\.venv\Scripts\python.exe backend\manage.py seed_portal_demo
+```
+
+Los comandos son idempotentes y conservan las cuentas/contraseñas existentes. No es necesario volver a ejecutarlos en un entorno ya inicializado.
+
+## 🔌 API REST y documentación
+
+La API está documentada con **OpenAPI 3.0.3** y Swagger UI. La documentación en ejecución se encuentra en:
+
+- Swagger: `/api/docs/`
+- Esquema OpenAPI: `/api/schema/`
+
+Grupos funcionales principales:
+
+| Grupo | Funcionalidad |
+|---|---|
+| Diagnóstico | Estado de backend y conexión con PostgreSQL |
+| Autenticación CMS | Login, logout, sesión y usuario actual |
+| Administración | Usuarios, roles, permisos, categorías, catálogos y configuración |
+| CMS | Contenidos, envío, visibilidad, revisión e historial |
+| Aprobaciones | Cola y decisión de solicitudes |
+| Notificaciones | Bandeja personal y marcado de lectura |
+| Analítica | Estadísticas, logs, señales defensivas y resultados |
+| Reportes | Exportaciones CSV/PDF con autorización |
+| Portal público | Configuración, categorías y publicaciones visibles |
+| Visitantes | Sesión visitante demo, logout y registro de actividad |
+| Encuestas | Consulta y envío de respuestas con validaciones del servidor |
+
+La API devuelve JSON. Las rutas, parámetros, esquemas, permisos y respuestas de error están descritos en OpenAPI y en `docs/arquitectura/CONTRATOS.md`.
+
+## 🛡️ Seguridad y privacidad
+
+La demostración incorpora controles de aplicación, pero no equivale a una instalación institucional:
+
+- Contraseñas ficticias CMS/visitante almacenadas con hash de Django.
+- 
